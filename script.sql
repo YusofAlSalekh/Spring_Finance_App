@@ -8,8 +8,8 @@ create table user
 create table account
 (
     id      SERIAL PRIMARY KEY,
-    name    varchar(255) NOT NULL,
-    balance decimal(10, 2),
+    name    varchar(255)   NOT NULL,
+    balance decimal(10, 2) NOT NULL,
     user_id int references user (id)
 );
 
@@ -25,8 +25,8 @@ create table category
 create table transaction
 (
     id                  SERIAL PRIMARY KEY,
-    datetime            timestamp,
-    amount              decimal,
+    datetime            timestamp      NOT NULL,
+    amount              decimal(10, 2) NOT NULL,
     sender_account_id   int references account (id),
     receiver_account_id int references account (id)
 );
