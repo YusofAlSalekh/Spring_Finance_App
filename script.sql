@@ -1,16 +1,17 @@
-create table user
+create table users
 (
     id       SERIAL PRIMARY KEY,
-    mail     varchar(255) NOT NULL,
-    password varchar(255) not null
+    email    varchar(255) NOT NULL UNIQUE,
+    password varchar(255) NOT NULL
 );
 
 create table account
 (
     id      SERIAL PRIMARY KEY,
-    name    varchar(255)   NOT NULL,
-    balance decimal(10, 2) NOT NULL,
-    user_id int references user (id)
+    name    varchar(255) NOT NULL,
+    balance integer      NOT NULL,
+    user_id int references users (id),
+    unique (name, user_id)
 );
 
 
@@ -18,14 +19,15 @@ create table category
 (
     id      SERIAL PRIMARY KEY,
     name    varchar(255) NOT NULL,
-    user_id int references user (id)
+    user_id int references users (id),
+    unique (name, user_id)
 );
 
 
 create table transaction
 (
     id                  SERIAL PRIMARY KEY,
-    datetime            timestamp      NOT NULL,
+    created_date        timestamp      NOT NULL,
     amount              decimal(10, 2) NOT NULL,
     sender_account_id   int references account (id),
     receiver_account_id int references account (id)
@@ -37,25 +39,25 @@ create table transaction_to_category
     category_id    int references category (id)
 );
 
-select u.mail,
-       a.name
-from account as a
-         join user as u on u.id = a.user_id
-WHERE u.id = user_id_of_interest;
+select name, balance
+from account
+WHERE user_id = your_user_id;
 
-select t.datetime as transaction_datetime,
+select t.created_date as transaction_created_date,
        t.amount,
        a.name,
-       u.mail
+       u.email
 from transaction as t
          join account as a on t.sender_account_id = a.id
-         join user as u on a.user_id = u.id
-where u.id = user_id_of_interest
-  and date_trunc('day', t.datetime) = current_date - interval '1 day';
+         join users as u on a.user_id = u.id
+where u.id = your_user_id
+  and date_trunc('day', t.created_date) = current_date - interval '1 day';
 
-select u.mail,
+select u.id,
+       u.email,
        sum(a.balance) as total_balance
 from account as a
-         join user as u on u.id = a.user_id
-group by u.mail;
+         join users as u
+              on u.id = a.user_id
+group by u.id;
 
