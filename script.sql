@@ -1,4 +1,4 @@
-create table users
+create table client
 (
     id       SERIAL PRIMARY KEY,
     email    varchar(255) NOT NULL UNIQUE,
@@ -7,20 +7,20 @@ create table users
 
 create table account
 (
-    id      SERIAL PRIMARY KEY,
-    name    varchar(255) NOT NULL,
-    balance integer      NOT NULL,
-    user_id int references users (id),
-    unique (name, user_id)
+    id        SERIAL PRIMARY KEY,
+    name      varchar(255) NOT NULL,
+    balance   integer      NOT NULL,
+    client_id int references client (id),
+    unique (name, client_id)
 );
 
 
 create table category
 (
-    id      SERIAL PRIMARY KEY,
-    name    varchar(255) NOT NULL,
-    user_id int references users (id),
-    unique (name, user_id)
+    id        SERIAL PRIMARY KEY,
+    name      varchar(255) NOT NULL,
+    client_id int references client (id),
+    unique (name, client_id)
 );
 
 
@@ -41,23 +41,22 @@ create table transaction_to_category
 
 select name, balance
 from account
-WHERE user_id = your_user_id;
+WHERE client_id = your_client_id;
 
 select t.created_date as transaction_created_date,
        t.amount,
        a.name,
-       u.email
+       c.email
 from transaction as t
          join account as a on t.sender_account_id = a.id
-         join users as u on a.user_id = u.id
-where u.id = your_user_id
+         join client as c on a.client_id = c.id
+where c.id = your_client_id
   and date_trunc('day', t.created_date) = current_date - interval '1 day';
 
-select u.id,
-       u.email,
+select c.email,
        sum(a.balance) as total_balance
 from account as a
-         join users as u
-              on u.id = a.user_id
-group by u.id;
+         join client as c
+              on c.id = a.client_id
+group by c.id;
 
