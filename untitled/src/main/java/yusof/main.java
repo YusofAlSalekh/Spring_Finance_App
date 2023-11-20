@@ -9,14 +9,9 @@ public class main {
 
     static Scanner scanner = new Scanner(System.in);
 
-
     public static void main(String[] args) {
-
         try (Connection connection = connectToDatabase()) {
-
-
             while (true) {
-
                 System.out.println("1.Register");
                 System.out.println("2.Login");
                 System.out.println("3.Exit");
@@ -28,7 +23,6 @@ public class main {
                     case 1:
                         register(connection);
                         break;
-
                     case 2:
                         login(connection);
                         break;
@@ -40,51 +34,43 @@ public class main {
                         System.out.println("Invalid choice. Please choose again.");
                 }
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-
     }
 
     private static void login(Connection connection) {
-
         System.out.println("Enter your email:");
         String email = scanner.nextLine();
-
 
         System.out.println("Enter your password:");
         String password = scanner.nextLine();
 
         String passwordHex = DigestUtils.md5Hex(password);
 
-
         try (
                 PreparedStatement preparedStatement = connection.prepareStatement(
-                        "select * from client where email = ? and password = ?"
+                        "select id from client where email = ? and password = ?"
                 )) {
             preparedStatement.setString(1, email);
             preparedStatement.setString(2, passwordHex);
 
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
+                int clientId = resultSet.getInt("id");
                 System.out.println("Login successfully");
-                showDashboard(connection);
-            } else System.out.println("Login error. Check your password or email  ");
-
+                showDashboard(connection, clientId);
+            } else {
+                System.out.println("Login error. Check your password or email  ");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("Login error. Pleas try again");
         }
-
     }
 
-    private static void showDashboard(Connection connection) {
-
-
+    private static void showDashboard(Connection connection, int clientId) {
         while (true) {
-
             System.out.println("User Dashboard:");
             System.out.println("1. View Account Information");
             System.out.println("2. Create an Account");
@@ -96,13 +82,13 @@ public class main {
 
             switch (dashboardChoice) {
                 case 1:
-                    viewAccountInformation(connection);
+                    viewAccountInformation(connection, clientId);
                     break;
                 case 2:
-                    creatAccount(connection);
+                    creatAccount(connection, clientId);
                     break;
                 case 3:
-                    deleteAccount(connection);
+                    deleteAccount(connection, clientId);
                     break;
                 case 4:
                     System.out.println("Logout successful");
@@ -111,20 +97,18 @@ public class main {
                     System.out.println("Incorrect choice!");
             }
         }
-
     }
 
-    private static void deleteAccount(Connection connection) {
-
+    private static void deleteAccount(Connection connection, int clientId) {
         System.out.println("Enter account id to delete");
         int accountId = scanner.nextInt();
         scanner.nextLine();
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(
-                "delete from account where id = ?")
+                "delete from account where id = ? and client_id = ?")
         ) {
-
             preparedStatement.setInt(1, accountId);
+            preparedStatement.setInt(2, clientId);
 
             int rowAffected = preparedStatement.executeUpdate();
 
@@ -133,23 +117,17 @@ public class main {
             } else {
                 System.out.println("Failed to delete an account. Please check the account id");
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("Failed to delete the account. Please try again.");
         }
-
-
     }
 
-    private static void creatAccount(Connection connection) {
-
+    private static void creatAccount(Connection connection, int clientId) {
         System.out.println("Enter the Account name");
         String name = scanner.nextLine();
         System.out.println("Enter the Account balance");
         int balance = scanner.nextInt();
-        System.out.println("Enter the Client id");
-        int clientId = scanner.nextInt();
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(
                 "insert into account (name,balance,client_id) values (?,?,?)"
@@ -166,13 +144,7 @@ public class main {
         }
     }
 
-
-    private static void viewAccountInformation(Connection connection) {
-
-        System.out.println("Enter client id");
-        int clientId = scanner.nextInt();
-        scanner.nextLine();
-
+    private static void viewAccountInformation(Connection connection, int clientId) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(
                 "select * from account where client_id = ?"
         )) {
@@ -189,15 +161,11 @@ public class main {
             e.printStackTrace();
             System.out.println("Error fetching account information.");
         }
-
     }
 
-
     private static void register(Connection connection) {
-
         System.out.println("Enter your email:");
         String email = scanner.nextLine();
-
 
         System.out.println("Enter your password:");
         String password = scanner.nextLine();
@@ -217,7 +185,6 @@ public class main {
             e.printStackTrace();
             System.out.println("Registration error. Please try again");
         }
-
     }
 
     private static Connection connectToDatabase() {
