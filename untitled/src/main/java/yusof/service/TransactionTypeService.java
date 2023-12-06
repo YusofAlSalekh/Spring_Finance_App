@@ -20,4 +20,12 @@ public class TransactionTypeService {
             return null;
         } else return transactionTypeModelToTransactionDtoConverter.convert(transactionTypeModel);
     }
+
+    public void deleteTransactionType(int transactionTypeId, int clientId) {
+        transactionTypeDao.deleteTransactionType(transactionTypeId, clientId);
+    }
+
+    public void editTransactionType(String newName, int transactionTypeId, int clientId) {
+        transactionTypeDao.editTransactionType(newName, transactionTypeId, clientId);
+    }
 }

@@ -72,13 +72,18 @@ public class main {
         int initialBalance = requestInt("Enter the initial balance:");
 
         accountService.createAccount(accountName, initialBalance, clientId);
-        System.out.println("New account created successfully!");
+        System.out.println("New account has been created successfully!");
     }
 
     private static void deleteAccount(AccountService accountService, int clientId) {
         int accountId = requestInt("Enter the account id:");
         accountService.deleteAccount(accountId, clientId);
-        System.out.println("account has been delete successfully");
+        System.out.println("Account has been deleted successfully");
+    }
+
+    private static void deleteTransactionType(TransactionTypeService transactionTypeService, int clientId) {
+        int transactionTypeId = requestInt("Enter the Transaction Type id:");
+        transactionTypeService.deleteTransactionType(transactionTypeId, clientId);
     }
 
     private static void createTransactionType(TransactionTypeService transactionTypeService, int clientId) {
@@ -94,7 +99,9 @@ public class main {
             System.out.println("2. Create an Account");
             System.out.println("3. Delete an Account");
             System.out.println("4. Create transaction type");
-            System.out.println("5. Logout");
+            System.out.println("5. Delete transaction type");
+            System.out.println("6. Edit transaction type");
+            System.out.println("7. Logout");
 
             int dashboardChoice = requestInt("Enter your choice:");
             AccountService accountService =
@@ -115,12 +122,25 @@ public class main {
                     createTransactionType(transactionTypeService, clientId);
                     break;
                 case 5:
+                    deleteTransactionType(transactionTypeService, clientId);
+                    break;
+                case 6:
+                    editTransactionType(transactionTypeService, clientId);
+                    break;
+                case 7:
                     System.out.println("Logout successful");
                     return;
                 default:
                     System.out.println("Incorrect choice!");
             }
         }
+    }
+
+    private static void editTransactionType(TransactionTypeService transactionTypeService, int clientId) {
+        int accountId = requestInt("Enter the Transaction Type id:");
+        String newName = requestString("Enter new Name for Transaction Type");
+        transactionTypeService.editTransactionType(newName, accountId, clientId);
+        System.out.println("Transaction Type has been edited");
     }
 
     static String requestString(String title) {

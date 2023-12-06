@@ -43,4 +43,30 @@ public class TransactionTypeDao {
             throw new CustomException(e);
         }
     }
+
+    public void deleteTransactionType(int transactionTypeId, int clientId) {
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement("delete from category where id = ? and client_id = ?");
+            preparedStatement.setInt(1, transactionTypeId);
+            preparedStatement.setInt(2, clientId);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new CustomException(e);
+        }
+    }
+
+    public void editTransactionType(String newName, int transactionTypeId, int clientId) {
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement("update category set name = ? where id = ? and client_id = ?");
+            preparedStatement.setString(1, newName);
+            preparedStatement.setInt(2, transactionTypeId);
+            preparedStatement.setInt(3, clientId);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new CustomException(e);
+        }
+    }
 }
+
