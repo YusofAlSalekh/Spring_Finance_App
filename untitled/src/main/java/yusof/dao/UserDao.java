@@ -1,25 +1,22 @@
 package yusof.dao;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-import yusof.exception.CustomException;
+import yusof.exceptions.AlreadyExistsException;
+import yusof.exceptions.CustomException;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.Optional;
+
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
 public class UserDao {
     private final DataSource dataSource;
 
     public UserDao() {
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:postgresql://localhost:5432/postgres");
-        config.setUsername("postgres");
-        config.setPassword("060571");
-
-        dataSource = new HikariDataSource(config);
+        this.dataSource = DatabaseManager.getDataSource();
     }
 
-    public UserModel findByEmailAndHash(String email, String hash) {
+    public Optional<UserModel> findByEmailAndHash(String email, String hash) {
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement =
                     connection.prepareStatement("select * from client where email=? " +
@@ -36,7 +33,7 @@ public class UserDao {
                 userModel.setEmail(resultSet.getString("email"));
                 userModel.setPassword(resultSet.getString("password"));
             }
-            return userModel;
+            return Optional.ofNullable(userModel);
         } catch (SQLException e) {
             throw new CustomException(e);
         }
@@ -45,7 +42,7 @@ public class UserDao {
     public UserModel insert(String email, String hash) {
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement("insert into client (email,password) values (?,?)",
-                    Statement.RETURN_GENERATED_KEYS);
+                    RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, email);
             preparedStatement.setString(2, hash);
 
@@ -57,8 +54,11 @@ public class UserDao {
                 userModel.setEmail(email);
                 userModel.setPassword(hash);
                 return userModel;
-            } else
-                throw new CustomException("Can not generate id!");
+            } else {
+                throw new CustomException("Something went wrong during registration. Please, try again later");
+            }
+        } catch (SQLIntegrityConstraintViolationException e) {
+            throw new AlreadyExistsException("User with the given email already exists.");
         } catch (SQLException e) {
             throw new CustomException(e);
         }

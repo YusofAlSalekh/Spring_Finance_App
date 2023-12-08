@@ -3,7 +3,7 @@ package yusof.service;
 public class AccountDTO {
     private int id;
     private String name;
-    private int balance;
+    private double balance;
     private int client_id;
 
     public int getId() {
@@ -22,11 +22,11 @@ public class AccountDTO {
         this.name = name;
     }
 
-    public int getBalance() {
+    public double getBalance() {
         return balance;
     }
 
-    public void setBalance(int balance) {
+    public void setBalance(double balance) {
         this.balance = balance;
     }
 

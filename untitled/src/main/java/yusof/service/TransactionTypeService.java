@@ -15,17 +15,14 @@ public class TransactionTypeService {
 
     public TransactionTypeDTO createCategory(String categoryName, int clientId) {
         TransactionTypeModel transactionTypeModel = transactionTypeDao.createTransactionType(categoryName, clientId);
-
-        if (transactionTypeModel == null) {
-            return null;
-        } else return transactionTypeModelToTransactionDtoConverter.convert(transactionTypeModel);
+        return transactionTypeModelToTransactionDtoConverter.convert(transactionTypeModel);
     }
 
-    public void deleteTransactionType(int transactionTypeId, int clientId) {
-        transactionTypeDao.deleteTransactionType(transactionTypeId, clientId);
+    public boolean deleteTransactionType(int transactionTypeId, int clientId) {
+        return transactionTypeDao.deleteTransactionType(transactionTypeId, clientId);
     }
 
-    public void editTransactionType(String newName, int transactionTypeId, int clientId) {
-        transactionTypeDao.editTransactionType(newName, transactionTypeId, clientId);
+    public boolean editTransactionType(String newName, int transactionTypeId, int clientId) {
+        return transactionTypeDao.editTransactionType(newName, transactionTypeId, clientId);
     }
 }

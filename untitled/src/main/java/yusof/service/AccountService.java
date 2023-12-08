@@ -26,14 +26,9 @@ public class AccountService {
         return accountDTOs;
     }
 
-    public AccountDTO createAccount(String accountName, int balance, int clientId) {
+    public AccountDTO createAccount(String accountName, double balance, int clientId) {
         AccountModel accountModel = accountDao.createAccount(accountName, balance, clientId);
-
-        if (accountModel == null) {
-            return null;
-        } else {
-            return accountDtoConverter.convert(accountModel);
-        }
+        return accountDtoConverter.convert(accountModel);
     }
 
     public void deleteAccount(int accountId, int clientId) {

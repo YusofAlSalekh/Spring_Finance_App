@@ -1,24 +1,19 @@
 package yusof.dao;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-import yusof.exception.CustomException;
+import yusof.exceptions.CustomException;
 
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
+
 public class AccountDao {
     private final DataSource dataSource;
 
     public AccountDao() {
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:postgresql://localhost:5432/postgres");
-        config.setUsername("postgres");
-        config.setPassword("060571");
-
-        dataSource = new HikariDataSource(config);
+        this.dataSource = DatabaseManager.getDataSource();
     }
 
     public List<AccountModel> findByClientID(int clientId) {
@@ -44,13 +39,13 @@ public class AccountDao {
         }
     }
 
-    public AccountModel createAccount(String accountName, int balance, int clientId) {
+    public AccountModel createAccount(String accountName, double balance, int clientId) {
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement =
                     connection.prepareStatement("insert into account (name,balance,client_id) values (?,?,?)"
-                            , Statement.RETURN_GENERATED_KEYS);
+                            , RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, accountName);
-            preparedStatement.setInt(2, balance);
+            preparedStatement.setDouble(2, balance);
             preparedStatement.setInt(3, clientId);
             preparedStatement.executeUpdate();
 
@@ -62,8 +57,9 @@ public class AccountDao {
                 accountModel.setBalance(balance);
                 accountModel.setClient_id(clientId);
                 return accountModel;
-            } else
-                throw new CustomException("Can not generate id!");
+            } else {
+                throw new CustomException("Something went wrong during creating account. Please, try again later");
+            }
         } catch (SQLException e) {
             throw new CustomException(e);
         }

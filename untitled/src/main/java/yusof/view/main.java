@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Scanner;
 
 public class main {
+    private static final Scanner scanner = new Scanner(System.in);
+
     public static void main(String[] args) {
         AuthorizationService authorizationService = new AuthorizationService();
 
@@ -69,7 +71,7 @@ public class main {
 
     private static void createNewAccount(AccountService accountService, int clientId) {
         String accountName = requestString("Enter the account name:");
-        int initialBalance = requestInt("Enter the initial balance:");
+        double initialBalance = requestDouble("Enter the initial balance:");
 
         accountService.createAccount(accountName, initialBalance, clientId);
         System.out.println("New account has been created successfully!");
@@ -83,7 +85,10 @@ public class main {
 
     private static void deleteTransactionType(TransactionTypeService transactionTypeService, int clientId) {
         int transactionTypeId = requestInt("Enter the Transaction Type id:");
-        transactionTypeService.deleteTransactionType(transactionTypeId, clientId);
+        boolean result = transactionTypeService.deleteTransactionType(transactionTypeId, clientId);
+        if (result) {
+            System.out.println("Category has been deleted");
+        }
     }
 
     private static void createTransactionType(TransactionTypeService transactionTypeService, int clientId) {
@@ -139,19 +144,32 @@ public class main {
     private static void editTransactionType(TransactionTypeService transactionTypeService, int clientId) {
         int accountId = requestInt("Enter the Transaction Type id:");
         String newName = requestString("Enter new Name for Transaction Type");
-        transactionTypeService.editTransactionType(newName, accountId, clientId);
-        System.out.println("Transaction Type has been edited");
+        boolean result = transactionTypeService.editTransactionType(newName, accountId, clientId);
+        if (result) {
+            System.out.println("Transaction Type has been edited");
+        }
     }
 
     static String requestString(String title) {
-        Scanner scanner = new Scanner(System.in);
         System.out.println(title);
         return scanner.next();
     }
 
     static int requestInt(String title) {
-        Scanner scanner = new Scanner(System.in);
         System.out.println(title);
+        while (!scanner.hasNextInt()) {
+            System.out.println("Invalid input. Please enter a valid number.");
+            scanner.next();
+        }
         return scanner.nextInt();
+    }
+
+    static double requestDouble(String title) {
+        System.out.println(title);
+        while (!scanner.hasNextDouble()) {
+            System.out.println("Invalid input. Please enter a valid number.");
+            scanner.next();
+        }
+        return scanner.nextDouble();
     }
 }

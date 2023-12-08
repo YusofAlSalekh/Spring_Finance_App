@@ -3,7 +3,9 @@ package yusof.service;
 import yusof.converter.UserModelToUserDtoConverter;
 import yusof.dao.UserDao;
 import yusof.dao.UserModel;
-import yusof.exception.CustomException;
+import yusof.exceptions.CustomException;
+
+import java.util.Optional;
 
 public class AuthorizationService {
     private final UserDao userDao;
@@ -19,23 +21,16 @@ public class AuthorizationService {
 
     public UserDTO authorize(String email, String password) {
         String hash = digestService.hex(password);
-        UserModel userModel = userDao.findByEmailAndHash(email, hash);
-        if (userModel != null) {
-            clientId = userModel.getId();
-            return userDtoConverter.convert(userModel);
-        } else {
-            throw new CustomException("incorrect login or password");
-        }
+        UserModel userModel = userDao.findByEmailAndHash(email, hash)
+                .orElseThrow(() -> new CustomException("incorrect login or password"));
+        clientId = userModel.getId();
+        return userDtoConverter.convert(userModel);
     }
 
     public UserDTO register(String email, String password) {
         String hash = digestService.hex(password);
         UserModel userModel = userDao.insert(email, hash);
-        if (userModel == null) {
-            return null;
-        } else {
-            return userDtoConverter.convert(userModel);
-        }
+        return userDtoConverter.convert(userModel);
     }
 
     public int getClientId() {

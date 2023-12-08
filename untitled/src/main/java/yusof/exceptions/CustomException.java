@@ -1,4 +1,4 @@
-package yusof.exception;
+package yusof.exceptions;
 
 public class CustomException extends RuntimeException {
     public CustomException(Throwable cause) {
