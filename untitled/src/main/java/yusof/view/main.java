@@ -1,18 +1,25 @@
 package yusof.view;
 
+import yusof.dao.CategoryAmountModel;
 import yusof.service.AccountDTO;
 import yusof.service.AccountService;
 import yusof.service.AuthorizationService;
 import yusof.service.TransactionTypeService;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
 
+import static yusof.service.ServiceFactory.*;
+
 public class main {
     private static final Scanner scanner = new Scanner(System.in);
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public static void main(String[] args) {
-        AuthorizationService authorizationService = new AuthorizationService();
+        AuthorizationService authorizationService = getAuthorizationService();
 
         while (true) {
             try {
@@ -106,12 +113,13 @@ public class main {
             System.out.println("4. Create transaction type");
             System.out.println("5. Delete transaction type");
             System.out.println("6. Edit transaction type");
-            System.out.println("7. Logout");
+            System.out.println("7. Get income information");
+            System.out.println("8. Get expense information");
+            System.out.println("9. Logout");
 
             int dashboardChoice = requestInt("Enter your choice:");
-            AccountService accountService =
-                    new AccountService();
-            TransactionTypeService transactionTypeService = new TransactionTypeService();
+            AccountService accountService = getAccountService();
+            TransactionTypeService transactionTypeService = getTransactionTypeService();
 
             switch (dashboardChoice) {
                 case 1:
@@ -133,6 +141,12 @@ public class main {
                     editTransactionType(transactionTypeService, clientId);
                     break;
                 case 7:
+                    getInformationByIncome(transactionTypeService, clientId);
+                    break;
+                case 8:
+                    getInformationByExpense(transactionTypeService, clientId);
+                    break;
+                case 9:
                     System.out.println("Logout successful");
                     return;
                 default:
@@ -150,6 +164,40 @@ public class main {
         }
     }
 
+    private static void getInformationByIncome(TransactionTypeService transactionTypeService, int clientId) {
+        LocalDate start = requestLocalDate("Enter start date");
+        LocalDate end = requestLocalDate("Enter end date");
+
+        System.out.println("Here is information about your income:");
+
+        List<CategoryAmountModel> categoryAmountModels = transactionTypeService.getIncomeReportByCategory(clientId, start, end);
+
+        if (!categoryAmountModels.isEmpty()) {
+            for (CategoryAmountModel categoryAmountModel : categoryAmountModels) {
+                System.out.println(categoryAmountModel);
+            }
+        } else {
+            System.out.println("No income information found for the client.");
+        }
+    }
+
+    private static void getInformationByExpense(TransactionTypeService transactionTypeService, int clientId) {
+        LocalDate start = requestLocalDate("Enter start date");
+        LocalDate end = requestLocalDate("Enter end date");
+
+        System.out.println("Here is information about your expenses:");
+
+        List<CategoryAmountModel> categoryAmountModels = transactionTypeService.getExpenseReportByCategory(clientId, start, end);
+
+        if (!categoryAmountModels.isEmpty()) {
+            for (CategoryAmountModel categoryAmountModel : categoryAmountModels) {
+                System.out.println(categoryAmountModel);
+            }
+        } else {
+            System.out.println("No expense information found for the client.");
+        }
+    }
+
     static String requestString(String title) {
         System.out.println(title);
         return scanner.next();
@@ -161,7 +209,9 @@ public class main {
             System.out.println("Invalid input. Please enter a valid number.");
             scanner.next();
         }
-        return scanner.nextInt();
+        int number = scanner.nextInt();
+        scanner.nextLine();
+        return number;
     }
 
     static double requestDouble(String title) {
@@ -170,6 +220,24 @@ public class main {
             System.out.println("Invalid input. Please enter a valid number.");
             scanner.next();
         }
-        return scanner.nextDouble();
+        double number = scanner.nextDouble();
+        scanner.nextLine();
+        return number;
+    }
+
+    public static LocalDate requestLocalDate(String prompt) {
+        System.out.println(prompt + " (YYYY-MM-DD):");
+        while (true) {
+            String dateInput = scanner.nextLine().trim();
+            if (!dateInput.isEmpty()) {
+                try {
+                    return LocalDate.parse(dateInput, formatter);
+                } catch (DateTimeParseException e) {
+                    System.out.println("Invalid date format. Please enter a date in the format YYYY-MM-DD (e.g., 2024-05-26).");
+                }
+            } else {
+                System.out.println("No input detected. Please enter a date.");
+            }
+        }
     }
 }

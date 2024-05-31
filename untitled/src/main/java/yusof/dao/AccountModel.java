@@ -1,5 +1,7 @@
 package yusof.dao;
 
+import java.util.Objects;
+
 public class AccountModel {
     private int id;
     private String name;
@@ -36,6 +38,19 @@ public class AccountModel {
 
     public void setClient_id(int client_id) {
         this.client_id = client_id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AccountModel that = (AccountModel) o;
+        return id == that.id && Double.compare(balance, that.balance) == 0 && client_id == that.client_id && Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, balance, client_id);
     }
 }
 

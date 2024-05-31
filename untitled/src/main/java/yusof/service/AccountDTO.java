@@ -1,5 +1,7 @@
 package yusof.service;
 
+import java.util.Objects;
+
 public class AccountDTO {
     private int id;
     private String name;
@@ -46,5 +48,18 @@ public class AccountDTO {
                 ", balance=" + balance +
                 ", client_id=" + client_id +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AccountDTO that = (AccountDTO) o;
+        return id == that.id && Double.compare(balance, that.balance) == 0 && client_id == that.client_id && Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, balance, client_id);
     }
 }

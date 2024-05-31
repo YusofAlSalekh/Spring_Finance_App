@@ -11,11 +11,18 @@ public class AccountService {
     private final AccountDao accountDao;
     private final AccountModelToAccountDtoConverter accountDtoConverter;
 
-    public AccountService() {
-        this.accountDao = new AccountDao();
-        this.accountDtoConverter = new AccountModelToAccountDtoConverter();
+    public AccountService(AccountDao accountDao, AccountModelToAccountDtoConverter accountDtoConverter) {
+        this.accountDao = accountDao;
+        this.accountDtoConverter = accountDtoConverter;
     }
 
+    /**
+     * What is wrong here with mocking(I got it) when not to use singleton
+     */
+   /* public AccountService() {
+        this.accountDao = new AccountDao();
+        this.accountDtoConverter = new AccountModelToAccountDtoConverter();
+    }*/
     public List<AccountDTO> viewAccount(int clientId) {
         List<AccountModel> accountModels = accountDao.findByClientID(clientId);
         List<AccountDTO> accountDTOs = new ArrayList<>();

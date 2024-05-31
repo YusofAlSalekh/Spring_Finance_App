@@ -1,0 +1,7 @@
+image: maven:3-jdk-8-slim
+
+test:
+  script:
+    - mvn clean test
+  only:
+    - branches

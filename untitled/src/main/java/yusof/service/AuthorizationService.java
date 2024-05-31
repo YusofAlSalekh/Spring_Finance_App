@@ -5,18 +5,16 @@ import yusof.dao.UserDao;
 import yusof.dao.UserModel;
 import yusof.exceptions.CustomException;
 
-import java.util.Optional;
-
 public class AuthorizationService {
     private final UserDao userDao;
     private final DigestService digestService;
     private final UserModelToUserDtoConverter userDtoConverter;
     private int clientId;
 
-    public AuthorizationService() {
-        this.userDao = new UserDao();
-        this.digestService = new Md5DigestService();
-        this.userDtoConverter = new UserModelToUserDtoConverter();
+    public AuthorizationService(UserDao userDao, DigestService digestService, UserModelToUserDtoConverter userDtoConverter) {
+        this.userDao = userDao;
+        this.digestService = digestService;
+        this.userDtoConverter = userDtoConverter;
     }
 
     public UserDTO authorize(String email, String password) {
