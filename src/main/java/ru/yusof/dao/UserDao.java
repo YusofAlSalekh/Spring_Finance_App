@@ -2,6 +2,7 @@ package ru.yusof.dao;
 
 import ru.yusof.exceptions.AlreadyExistsException;
 import ru.yusof.exceptions.CustomException;
+import ru.yusof.exceptions.RegistrationOfANewUserException;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -55,7 +56,7 @@ public class UserDao {
                 userModel.setPassword(hash);
                 return userModel;
             } else {
-                throw new CustomException("Something went wrong during registration. Please, try again later");
+                throw new RegistrationOfANewUserException("Something went wrong during registration. Please, try again later");
             }
         } catch (SQLIntegrityConstraintViolationException e) {
             throw new AlreadyExistsException("User with the given email already exists.");

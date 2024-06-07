@@ -1,6 +1,8 @@
 package ru.yusof.dao;
 
+import ru.yusof.exceptions.CreatingAccountException;
 import ru.yusof.exceptions.CustomException;
+import ru.yusof.exceptions.DeletionAccountException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -66,7 +68,7 @@ public class AccountDao {
                 accountModel.setClient_id(clientId);
                 return accountModel;
             } else {
-                throw new CustomException("Something went wrong during creating account. Please, try again later");
+                throw new CreatingAccountException("Something went wrong during creating account. Please, try again later");
             }
         } catch (SQLException e) {
             throw new CustomException("Error occurred during account creation", e);
@@ -81,7 +83,7 @@ public class AccountDao {
             preparedStatement.setInt(2, clientId);
             int affectedRows = preparedStatement.executeUpdate();
             if (affectedRows == 0) {
-                throw new IllegalStateException("No account found with ID: " + accountId + " for client ID: " + clientId);
+                throw new DeletionAccountException("No account found with ID: " + accountId + " for client ID: " + clientId);
             }
         } catch (SQLException e) {
             throw new CustomException("Error occurred while deleting account", e);

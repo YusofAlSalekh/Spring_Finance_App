@@ -1,6 +1,6 @@
 package ru.yusof.dao;
 
-import ru.yusof.exceptions.CustomException;
+import ru.yusof.exceptions.*;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -10,7 +10,6 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
@@ -29,7 +28,7 @@ public class TransactionTypeDao {
             preparedStatement.setInt(2, clientId);
             int affectedRows = preparedStatement.executeUpdate();
             if (affectedRows == 0) {
-                throw new SQLException("Creating transaction type failed, no rows affected.");
+                throw new CreatingTransactionTypeException("Creating transaction type failed, no rows affected.");
             }
 
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
@@ -40,7 +39,7 @@ public class TransactionTypeDao {
                 transactionTypeModel.setClientId(clientId);
                 return transactionTypeModel;
             } else {
-                throw new SQLException("Creating transaction type failed, no ID obtained.");
+                throw new CreatingTransactionTypeException("Creating transaction type failed, no ID obtained.");
             }
         } catch (SQLException e) {
             throw new CustomException("Error occurred during transaction type creation", e);
@@ -55,7 +54,7 @@ public class TransactionTypeDao {
             preparedStatement.setInt(2, clientId);
             int affectedRows = preparedStatement.executeUpdate();
             if (affectedRows == 0) {
-                throw new NoSuchElementException("No transaction type found with ID: " + transactionTypeId);
+                throw new DeletionTransactionTypeException("No transaction type found with ID: " + transactionTypeId);
             }
             return true;
         } catch (SQLException e) {
@@ -72,7 +71,7 @@ public class TransactionTypeDao {
             preparedStatement.setInt(3, clientId);
             int affectedRows = preparedStatement.executeUpdate();
             if (affectedRows == 0) {
-                throw new NoSuchElementException("No transaction type found with ID: " + transactionTypeId);
+                throw new AddingTransactionTypeException("No transaction type found with ID: " + transactionTypeId);
             }
             return true;
         } catch (SQLException e) {
@@ -98,16 +97,21 @@ public class TransactionTypeDao {
             preparedStatement.setObject(3, endDate);
 
             ResultSet resultSet = preparedStatement.executeQuery();
+            boolean found = false;
             while (resultSet.next()) {
+                found = true;
                 CategoryAmountModel categoryAmountModel = new CategoryAmountModel();
                 categoryAmountModel.setCategoryName(resultSet.getString("category_name"));
                 categoryAmountModel.setTotalAmount(resultSet.getBigDecimal("total_amount"));
                 categoryAmountModels.add(categoryAmountModel);
             }
+            if (!found) {
+                throw new GetExpenseByCategoryException("There is a problem with getting expense");
+            }
+            return categoryAmountModels;
         } catch (SQLException e) {
             throw new RuntimeException("Database error during expense data fetch", e);
         }
-        return categoryAmountModels;
     }
 
     public List<CategoryAmountModel> fetchIncomeByCategory(int clientId, LocalDate startDate, LocalDate endDate) {
@@ -128,15 +132,20 @@ public class TransactionTypeDao {
             preparedStatement.setObject(3, endDate);
 
             ResultSet resultSet = preparedStatement.executeQuery();
+            boolean found = false;
             while (resultSet.next()) {
+                found = true;
                 CategoryAmountModel categoryAmountModel = new CategoryAmountModel();
                 categoryAmountModel.setCategoryName(resultSet.getString("category_name"));
                 categoryAmountModel.setTotalAmount(resultSet.getBigDecimal("total_amount"));
                 categoryAmountModels.add(categoryAmountModel);
             }
+            if (!found) {
+                throw new GetIncomeByCategoryException("There is a problem with getting income");
+            }
+            return categoryAmountModels;
         } catch (SQLException e) {
             throw new RuntimeException("Database error during income data fetch", e);
         }
-        return categoryAmountModels;
     }
 }

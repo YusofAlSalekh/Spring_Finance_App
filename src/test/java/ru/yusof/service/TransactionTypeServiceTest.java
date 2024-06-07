@@ -5,11 +5,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.yusof.exceptions.CustomException;
 import ru.yusof.converter.TransactionTypeModelToTransactionDtoConverter;
 import ru.yusof.dao.CategoryAmountModel;
 import ru.yusof.dao.TransactionTypeDao;
 import ru.yusof.dao.TransactionTypeModel;
+import ru.yusof.exceptions.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -52,9 +52,9 @@ class TransactionTypeServiceTest {
 
     @Test
     void categoryWasNotCreated() {
-        when(transactionTypeDao.createTransactionType("name", 1)).thenThrow(new CustomException("Something went wrong during generating new category. Please, try again later!"));
+        when(transactionTypeDao.createTransactionType("name", 1)).thenThrow(new CreatingTransactionTypeException("Something went wrong during generating new category. Please, try again later!"));
 
-        assertThrows(CustomException.class, () -> subj.createCategory("name", 1), "Something went wrong during generating new category. Please, try again later!");
+        assertThrows(CreatingTransactionTypeException.class, () -> subj.createCategory("name", 1), "Something went wrong during generating new category. Please, try again later!");
 
         verify(transactionTypeDao, times(1)).createTransactionType("name", 1);
         verifyNoInteractions(transactionTypeModelToTransactionDtoConverter);
@@ -72,9 +72,9 @@ class TransactionTypeServiceTest {
 
     @Test
     void transactionTypeWasNotDeleted() {
-        when(transactionTypeDao.deleteTransactionType(1, 1)).thenThrow(new CustomException("Something went wrong. Please, try to delete again later!"));
+        when(transactionTypeDao.deleteTransactionType(1, 1)).thenThrow(new DeletionTransactionTypeException("Something went wrong. Please, try to delete again later!"));
 
-        assertThrows(CustomException.class, () -> subj.deleteTransactionType(1, 1), "Something went wrong. Please, try to delete again later!");
+        assertThrows(DeletionTransactionTypeException.class, () -> subj.deleteTransactionType(1, 1), "Something went wrong. Please, try to delete again later!");
 
         verify(transactionTypeDao, times(1)).deleteTransactionType(1, 1);
     }
@@ -90,9 +90,9 @@ class TransactionTypeServiceTest {
 
     @Test
     void transactionTypeWasNotEdited() {
-        when(transactionTypeDao.editTransactionType("name", 1, 1)).thenThrow(new CustomException("Something went wrong during editing. Please, try again later!"));
+        when(transactionTypeDao.editTransactionType("name", 1, 1)).thenThrow(new AddingTransactionTypeException("Something went wrong during editing. Please, try again later!"));
 
-        assertThrows(CustomException.class, () -> subj.editTransactionType("name", 1, 1), "Something went wrong. Please, try to delete again later!");
+        assertThrows(AddingTransactionTypeException.class, () -> subj.editTransactionType("name", 1, 1), "Something went wrong. Please, try to delete again later!");
 
         verify(transactionTypeDao, times(1)).editTransactionType("name", 1, 1);
     }
@@ -127,18 +127,18 @@ class TransactionTypeServiceTest {
 
     @Test
     void ReportOverExpensesDoesntWork() {
-        when(transactionTypeDao.fetchExpenseByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30"))).thenThrow(new RuntimeException("The expense report failed to be displayed"));
+        when(transactionTypeDao.fetchExpenseByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30"))).thenThrow(new GetExpenseByCategoryException("The expense report failed to be displayed"));
 
-        assertThrows(RuntimeException.class, () -> subj.getExpenseReportByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30")), "The expense report failed to be displayed");
+        assertThrows(GetExpenseByCategoryException.class, () -> subj.getExpenseReportByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30")), "The expense report failed to be displayed");
 
         verify(transactionTypeDao, times(1)).fetchExpenseByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30"));
     }
 
     @Test
     void ReportOverIncomeDoesntWork() {
-        when(transactionTypeDao.fetchIncomeByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30"))).thenThrow(new RuntimeException("The income report failed to be displayed"));
+        when(transactionTypeDao.fetchIncomeByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30"))).thenThrow(new GetIncomeByCategoryException("The income report failed to be displayed"));
 
-        assertThrows(RuntimeException.class, () -> subj.getIncomeReportByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30")), "The income report failed to be displayed");
+        assertThrows(GetIncomeByCategoryException.class, () -> subj.getIncomeReportByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30")), "The income report failed to be displayed");
 
         verify(transactionTypeDao, times(1)).fetchIncomeByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30"));
     }

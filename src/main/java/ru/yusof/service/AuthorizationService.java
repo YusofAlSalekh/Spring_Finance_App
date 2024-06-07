@@ -3,6 +3,7 @@ package ru.yusof.service;
 import ru.yusof.converter.UserModelToUserDtoConverter;
 import ru.yusof.dao.UserDao;
 import ru.yusof.dao.UserModel;
+import ru.yusof.exceptions.BadCredentialsException;
 import ru.yusof.exceptions.CustomException;
 
 public class AuthorizationService {
@@ -20,7 +21,7 @@ public class AuthorizationService {
     public UserDTO authorize(String email, String password) {
         String hash = digestService.hex(password);
         UserModel userModel = userDao.findByEmailAndHash(email, hash)
-                .orElseThrow(() -> new CustomException("incorrect login or password"));
+                .orElseThrow(() -> new BadCredentialsException("incorrect login or password"));
         clientId = userModel.getId();
         return userDtoConverter.convert(userModel);
     }

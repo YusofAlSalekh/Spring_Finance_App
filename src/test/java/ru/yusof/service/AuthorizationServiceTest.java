@@ -9,7 +9,8 @@ import ru.yusof.converter.UserModelToUserDtoConverter;
 import ru.yusof.dao.UserDao;
 import ru.yusof.dao.UserModel;
 import ru.yusof.exceptions.AlreadyExistsException;
-import ru.yusof.exceptions.CustomException;
+import ru.yusof.exceptions.BadCredentialsException;
+import ru.yusof.exceptions.RegistrationOfANewUserException;
 
 import java.util.Optional;
 
@@ -32,7 +33,7 @@ class AuthorizationServiceTest {
         when(digestService.hex("password")).thenReturn("hex");
         when(userDao.findByEmailAndHash("yus060571@gmail.com", "hex")).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> {
+        assertThrows(BadCredentialsException.class, () -> {
             subj.authorize("yus060571@gmail.com", "password");
         }, "incorrect login or password");
 
@@ -106,9 +107,9 @@ class AuthorizationServiceTest {
     @Test
     void register_userDidNotAdded() {
         when(digestService.hex("password")).thenReturn("hex");
-        when(userDao.insert("yus060571@gmail.com", "hex")).thenThrow(new CustomException("Something went wrong during registration. Please, try again later"));
+        when(userDao.insert("yus060571@gmail.com", "hex")).thenThrow(new RegistrationOfANewUserException("Something went wrong during registration. Please, try again later"));
 
-        assertThrows(CustomException.class, () -> {
+        assertThrows(RegistrationOfANewUserException.class, () -> {
             subj.register("yus060571@gmail.com", "password");
         }, "Something went wrong during registration. Please, try again later");
 

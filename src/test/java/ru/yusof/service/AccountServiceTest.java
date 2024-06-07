@@ -8,6 +8,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.yusof.converter.AccountModelToAccountDtoConverter;
 import ru.yusof.dao.AccountDao;
 import ru.yusof.dao.AccountModel;
+import ru.yusof.exceptions.CreatingAccountException;
+import ru.yusof.exceptions.DeletionAccountException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -89,9 +91,9 @@ class AccountServiceTest {
 
     @Test
     void accountWasNotCreatedSomethingWentWrong() {
-        when(accountDao.createAccount("yusoff", 100, 10)).thenThrow(new IllegalStateException("Something went wrong during creating account. Please, try again later"));
+        when(accountDao.createAccount("yusoff", 100, 10)).thenThrow(new CreatingAccountException("Something went wrong during creating account. Please, try again later"));
 
-        assertThrows(IllegalStateException.class, () ->
+        assertThrows(CreatingAccountException.class, () ->
                         subj.createAccount("yusoff", 100, 10),
                 "Something went wrong during creating account. Please, try again later");
 
@@ -108,9 +110,9 @@ class AccountServiceTest {
 
     @Test
     void deleteAccountFailed() {
-        doThrow(new UnsupportedOperationException("Error occurred while deleting account")).when(accountDao).deleteAccount(1, 1);
+        doThrow(new DeletionAccountException("Error occurred while deleting account")).when(accountDao).deleteAccount(1, 1);
 
-        assertThrows(UnsupportedOperationException.class, () -> subj.deleteAccount(1, 1), "Deletion failed");
+        assertThrows(DeletionAccountException.class, () -> subj.deleteAccount(1, 1), "Deletion failed");
         verify(accountDao, times(1)).deleteAccount(1, 1);
     }
 }
