@@ -1,6 +1,6 @@
 package ru.yusof.service;
 
-public class TransactionTypeDTO {
+public class TransactionDTO {
     private int id;
     private String name;
     private int client_id;

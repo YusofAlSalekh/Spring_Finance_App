@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.yusof.converter.TransactionTypeModelToTransactionDtoConverter;
 import ru.yusof.dao.CategoryAmountModel;
-import ru.yusof.dao.TransactionTypeDao;
+import ru.yusof.dao.TransactionDao;
 import ru.yusof.dao.TransactionTypeModel;
 import ru.yusof.exceptions.*;
 
@@ -20,11 +20,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class TransactionTypeServiceTest {
+class TransactionServiceTest {
     @InjectMocks
-    TransactionTypeService subj;
+    TransactionService subj;
     @Mock
-    TransactionTypeDao transactionTypeDao;
+    TransactionDao transactionDao;
     @Mock
     TransactionTypeModelToTransactionDtoConverter transactionTypeModelToTransactionDtoConverter;
 
@@ -34,67 +34,67 @@ class TransactionTypeServiceTest {
         transactionTypeModel.setClientId(1);
         transactionTypeModel.setName("name");
         transactionTypeModel.setId(1);
-        when(transactionTypeDao.createTransactionType("name", 1)).thenReturn(transactionTypeModel);
+        when(transactionDao.createTransactionType("name", 1)).thenReturn(transactionTypeModel);
 
-        TransactionTypeDTO transactionTypeDTO = new TransactionTypeDTO();
-        transactionTypeDTO.setClient_id(1);
-        transactionTypeDTO.setId(1);
-        transactionTypeDTO.setName("name");
-        when(transactionTypeModelToTransactionDtoConverter.convert(transactionTypeModel)).thenReturn(transactionTypeDTO);
+        TransactionDTO transactionDTO = new TransactionDTO();
+        transactionDTO.setClient_id(1);
+        transactionDTO.setId(1);
+        transactionDTO.setName("name");
+        when(transactionTypeModelToTransactionDtoConverter.convert(transactionTypeModel)).thenReturn(transactionDTO);
 
-        TransactionTypeDTO transaction = subj.createCategory("name", 1);
+        TransactionDTO transaction = subj.createCategory("name", 1);
         assertNotNull(transaction);
-        assertEquals(transaction, transactionTypeDTO);
+        assertEquals(transaction, transactionDTO);
 
-        verify(transactionTypeDao, times(1)).createTransactionType("name", 1);
+        verify(transactionDao, times(1)).createTransactionType("name", 1);
         verify(transactionTypeModelToTransactionDtoConverter, times(1)).convert(transactionTypeModel);
     }
 
     @Test
     void categoryWasNotCreated() {
-        when(transactionTypeDao.createTransactionType("name", 1)).thenThrow(new CreatingTransactionTypeException("Something went wrong during generating new category. Please, try again later!"));
+        when(transactionDao.createTransactionType("name", 1)).thenThrow(new CreatingTransactionTypeException("Something went wrong during generating new category. Please, try again later!"));
 
         assertThrows(CreatingTransactionTypeException.class, () -> subj.createCategory("name", 1), "Something went wrong during generating new category. Please, try again later!");
 
-        verify(transactionTypeDao, times(1)).createTransactionType("name", 1);
+        verify(transactionDao, times(1)).createTransactionType("name", 1);
         verifyNoInteractions(transactionTypeModelToTransactionDtoConverter);
     }
 
     @Test
     void transactionTypeWasDeleted() {
-        when(transactionTypeDao.deleteTransactionType(1, 1)).thenReturn(true);
+        when(transactionDao.deleteTransactionType(1, 1)).thenReturn(true);
         boolean a = subj.deleteTransactionType(1, 1);
 
         assertTrue(a);
 
-        verify(transactionTypeDao, times(1)).deleteTransactionType(1, 1);
+        verify(transactionDao, times(1)).deleteTransactionType(1, 1);
     }
 
     @Test
     void transactionTypeWasNotDeleted() {
-        when(transactionTypeDao.deleteTransactionType(1, 1)).thenThrow(new DeletionTransactionTypeException("Something went wrong. Please, try to delete again later!"));
+        when(transactionDao.deleteTransactionType(1, 1)).thenThrow(new DeletionTransactionTypeException("Something went wrong. Please, try to delete again later!"));
 
         assertThrows(DeletionTransactionTypeException.class, () -> subj.deleteTransactionType(1, 1), "Something went wrong. Please, try to delete again later!");
 
-        verify(transactionTypeDao, times(1)).deleteTransactionType(1, 1);
+        verify(transactionDao, times(1)).deleteTransactionType(1, 1);
     }
 
     @Test
     void transactionTypeWasEdited() {
-        when(transactionTypeDao.editTransactionType("name", 1, 1)).thenReturn(true);
+        when(transactionDao.editTransactionType("name", 1, 1)).thenReturn(true);
 
         assertTrue(subj.editTransactionType("name", 1, 1));
 
-        verify(transactionTypeDao, times(1)).editTransactionType("name", 1, 1);
+        verify(transactionDao, times(1)).editTransactionType("name", 1, 1);
     }
 
     @Test
     void transactionTypeWasNotEdited() {
-        when(transactionTypeDao.editTransactionType("name", 1, 1)).thenThrow(new AddingTransactionTypeException("Something went wrong during editing. Please, try again later!"));
+        when(transactionDao.editTransactionType("name", 1, 1)).thenThrow(new AddingTransactionTypeException("Something went wrong during editing. Please, try again later!"));
 
         assertThrows(AddingTransactionTypeException.class, () -> subj.editTransactionType("name", 1, 1), "Something went wrong. Please, try to delete again later!");
 
-        verify(transactionTypeDao, times(1)).editTransactionType("name", 1, 1);
+        verify(transactionDao, times(1)).editTransactionType("name", 1, 1);
     }
 
     @Test
@@ -103,7 +103,7 @@ class TransactionTypeServiceTest {
         categoryAmountModel.setCategoryName("name");
         categoryAmountModel.setTotalAmount(BigDecimal.valueOf(100));
         List<CategoryAmountModel> categoryAmountModels = Arrays.asList(categoryAmountModel);
-        when(transactionTypeDao.fetchIncomeByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30"))).thenReturn(categoryAmountModels);
+        when(transactionDao.fetchIncomeByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30"))).thenReturn(categoryAmountModels);
 
         List<CategoryAmountModel> list = subj.getIncomeReportByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30"));
 
@@ -117,7 +117,7 @@ class TransactionTypeServiceTest {
         categoryAmountModel.setCategoryName("name");
         categoryAmountModel.setTotalAmount(BigDecimal.valueOf(100));
         List<CategoryAmountModel> categoryAmountModels = Arrays.asList(categoryAmountModel);
-        when(transactionTypeDao.fetchExpenseByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30"))).thenReturn(categoryAmountModels);
+        when(transactionDao.fetchExpenseByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30"))).thenReturn(categoryAmountModels);
 
         List<CategoryAmountModel> list = subj.getExpenseReportByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30"));
 
@@ -127,19 +127,19 @@ class TransactionTypeServiceTest {
 
     @Test
     void ReportOverExpensesDoesntWork() {
-        when(transactionTypeDao.fetchExpenseByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30"))).thenThrow(new GetExpenseByCategoryException("The expense report failed to be displayed"));
+        when(transactionDao.fetchExpenseByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30"))).thenThrow(new GetExpenseByCategoryException("The expense report failed to be displayed"));
 
         assertThrows(GetExpenseByCategoryException.class, () -> subj.getExpenseReportByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30")), "The expense report failed to be displayed");
 
-        verify(transactionTypeDao, times(1)).fetchExpenseByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30"));
+        verify(transactionDao, times(1)).fetchExpenseByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30"));
     }
 
     @Test
     void ReportOverIncomeDoesntWork() {
-        when(transactionTypeDao.fetchIncomeByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30"))).thenThrow(new GetIncomeByCategoryException("The income report failed to be displayed"));
+        when(transactionDao.fetchIncomeByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30"))).thenThrow(new GetIncomeByCategoryException("The income report failed to be displayed"));
 
         assertThrows(GetIncomeByCategoryException.class, () -> subj.getIncomeReportByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30")), "The income report failed to be displayed");
 
-        verify(transactionTypeDao, times(1)).fetchIncomeByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30"));
+        verify(transactionDao, times(1)).fetchIncomeByCategory(1, LocalDate.parse("2024-05-25"), LocalDate.parse("2024-05-30"));
     }
 }

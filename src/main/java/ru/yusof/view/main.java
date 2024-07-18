@@ -2,14 +2,12 @@ package ru.yusof.view;
 
 import ru.yusof.dao.CategoryAmountModel;
 import ru.yusof.service.*;
-import ru.yusof.service.AccountDTO;
-import ru.yusof.service.AccountService;
-import ru.yusof.service.AuthorizationService;
-import ru.yusof.service.TransactionTypeService;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -89,17 +87,17 @@ public class main {
         System.out.println("Account has been deleted successfully");
     }
 
-    private static void deleteTransactionType(TransactionTypeService transactionTypeService, int clientId) {
+    private static void deleteTransactionType(TransactionService transactionService, int clientId) {
         int transactionTypeId = requestInt("Enter the Transaction Type id:");
-        boolean result = transactionTypeService.deleteTransactionType(transactionTypeId, clientId);
+        boolean result = transactionService.deleteTransactionType(transactionTypeId, clientId);
         if (result) {
             System.out.println("Category has been deleted");
         }
     }
 
-    private static void createTransactionType(TransactionTypeService transactionTypeService, int clientId) {
+    private static void createTransactionType(TransactionService transactionService, int clientId) {
         String transactionName = requestString("Enter the category name:");
-        transactionTypeService.createCategory(transactionName, clientId);
+        transactionService.createCategory(transactionName, clientId);
         System.out.println("New category created successfully!");
     }
 
@@ -114,11 +112,12 @@ public class main {
             System.out.println("6. Edit transaction type");
             System.out.println("7. Get income information");
             System.out.println("8. Get expense information");
-            System.out.println("9. Logout");
+            System.out.println("9. Transfer money between accounts");
+            System.out.println("10. Logout");
 
             int dashboardChoice = requestInt("Enter your choice:");
             AccountService accountService = ServiceFactory.getAccountService();
-            TransactionTypeService transactionTypeService = ServiceFactory.getTransactionTypeService();
+            TransactionService transactionService = ServiceFactory.getTransactionTypeService();
 
             switch (dashboardChoice) {
                 case 1:
@@ -131,21 +130,24 @@ public class main {
                     deleteAccount(accountService, clientId);
                     break;
                 case 4:
-                    createTransactionType(transactionTypeService, clientId);
+                    createTransactionType(transactionService, clientId);
                     break;
                 case 5:
-                    deleteTransactionType(transactionTypeService, clientId);
+                    deleteTransactionType(transactionService, clientId);
                     break;
                 case 6:
-                    editTransactionType(transactionTypeService, clientId);
+                    editTransactionType(transactionService, clientId);
                     break;
                 case 7:
-                    getInformationByIncome(transactionTypeService, clientId);
+                    getInformationByIncome(transactionService, clientId);
                     break;
                 case 8:
-                    getInformationByExpense(transactionTypeService, clientId);
+                    getInformationByExpense(transactionService, clientId);
                     break;
                 case 9:
+                    performTransaction(transactionService, clientId);
+                    break;
+                case 10:
                     System.out.println("Logout successful");
                     return;
                 default:
@@ -154,22 +156,32 @@ public class main {
         }
     }
 
-    private static void editTransactionType(TransactionTypeService transactionTypeService, int clientId) {
+    private static void performTransaction(TransactionService transactionService, int clientId) {
+        int senderAccountId = requestInt("Enter the ID of the account you are going to send money from:");
+        int receiverAccountId = requestInt("Enter the ID of the account you are going to send money to:");
+        BigDecimal amount = requestBigDecimal("Enter the amount:");
+        List<Integer> categoryIds = requestCategoryIds();
+
+        transactionService.performTransaction(senderAccountId, receiverAccountId, amount, categoryIds);
+        System.out.println("Transaction completed successfully!");
+    }
+
+    private static void editTransactionType(TransactionService transactionService, int clientId) {
         int accountId = requestInt("Enter the Transaction Type id:");
         String newName = requestString("Enter new Name for Transaction Type");
-        boolean result = transactionTypeService.editTransactionType(newName, accountId, clientId);
+        boolean result = transactionService.editTransactionType(newName, accountId, clientId);
         if (result) {
             System.out.println("Transaction Type has been edited");
         }
     }
 
-    private static void getInformationByIncome(TransactionTypeService transactionTypeService, int clientId) {
+    private static void getInformationByIncome(TransactionService transactionService, int clientId) {
         LocalDate start = requestLocalDate("Enter start date");
         LocalDate end = requestLocalDate("Enter end date");
 
         System.out.println("Here is information about your income:");
 
-        List<CategoryAmountModel> categoryAmountModels = transactionTypeService.getIncomeReportByCategory(clientId, start, end);
+        List<CategoryAmountModel> categoryAmountModels = transactionService.getIncomeReportByCategory(clientId, start, end);
 
         if (!categoryAmountModels.isEmpty()) {
             for (CategoryAmountModel categoryAmountModel : categoryAmountModels) {
@@ -180,13 +192,13 @@ public class main {
         }
     }
 
-    private static void getInformationByExpense(TransactionTypeService transactionTypeService, int clientId) {
+    private static void getInformationByExpense(TransactionService transactionService, int clientId) {
         LocalDate start = requestLocalDate("Enter start date");
         LocalDate end = requestLocalDate("Enter end date");
 
         System.out.println("Here is information about your expenses:");
 
-        List<CategoryAmountModel> categoryAmountModels = transactionTypeService.getExpenseReportByCategory(clientId, start, end);
+        List<CategoryAmountModel> categoryAmountModels = transactionService.getExpenseReportByCategory(clientId, start, end);
 
         if (!categoryAmountModels.isEmpty()) {
             for (CategoryAmountModel categoryAmountModel : categoryAmountModels) {
@@ -238,5 +250,31 @@ public class main {
                 System.out.println("No input detected. Please enter a date.");
             }
         }
+    }
+
+    static BigDecimal requestBigDecimal(String title) {
+        System.out.println(title);
+        while (!scanner.hasNextBigDecimal()) {
+            System.out.println("Invalid input. Please enter a valid number.");
+            scanner.next();
+        }
+        BigDecimal number = scanner.nextBigDecimal();
+        scanner.nextLine();
+        return number;
+    }
+
+    private static List<Integer> requestCategoryIds() {
+        System.out.println("Enter the category IDs (comma separated):");
+        String input = scanner.nextLine();
+        String[] parts = input.split(",");
+        List<Integer> categoryIds = new ArrayList<>();
+        for (String part : parts) {
+            try {
+                categoryIds.add(Integer.parseInt(part.trim()));
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input for category ID: " + part);
+            }
+        }
+        return categoryIds;
     }
 }
