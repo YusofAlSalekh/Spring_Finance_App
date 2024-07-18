@@ -1,6 +1,6 @@
 package ru.yusof.service;
 
-import ru.yusof.converter.AccountModelToAccountDtoConverter;
+import ru.yusof.converter.Converter;
 import ru.yusof.dao.AccountDao;
 import ru.yusof.dao.AccountModel;
 
@@ -9,9 +9,9 @@ import java.util.List;
 
 public class AccountService {
     private final AccountDao accountDao;
-    private final AccountModelToAccountDtoConverter accountDtoConverter;
+    private final Converter<AccountModel, AccountDTO> accountDtoConverter;
 
-    public AccountService(AccountDao accountDao, AccountModelToAccountDtoConverter accountDtoConverter) {
+    public AccountService(AccountDao accountDao, Converter<AccountModel, AccountDTO> accountDtoConverter) {
         this.accountDao = accountDao;
         this.accountDtoConverter = accountDtoConverter;
     }

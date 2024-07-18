@@ -18,8 +18,8 @@ import static java.sql.Statement.RETURN_GENERATED_KEYS;
 public class AccountDao {
     private final DataSource dataSource;
 
-    public AccountDao() {
-        this.dataSource = DatabaseManager.getDataSource();
+    public AccountDao(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     public List<AccountModel> findByClientID(int clientId) {
@@ -51,6 +51,15 @@ public class AccountDao {
 
     public AccountModel createAccount(String accountName, double balance, int clientId) {
         try (Connection connection = dataSource.getConnection()) {
+            // Check if clientId exists
+            PreparedStatement checkClientStatement = connection.prepareStatement("select * from client where id = ?");
+            checkClientStatement.setInt(1, clientId);
+            ResultSet clientResultSet = checkClientStatement.executeQuery();
+            if (!clientResultSet.next()) {
+                throw new CreatingAccountException("Client ID does not exist: " + clientId);
+            }
+
+            // Insert new account
             PreparedStatement preparedStatement =
                     connection.prepareStatement("insert into account (name,balance,client_id) values (?,?,?)"
                             , RETURN_GENERATED_KEYS);

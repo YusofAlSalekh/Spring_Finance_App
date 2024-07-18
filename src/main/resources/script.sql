@@ -60,3 +60,4 @@ from account as a
               on c.id = a.client_id
 group by c.id;
 
+select md5('123');

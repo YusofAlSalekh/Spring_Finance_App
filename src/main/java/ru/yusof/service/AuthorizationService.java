@@ -1,18 +1,17 @@
 package ru.yusof.service;
 
-import ru.yusof.converter.UserModelToUserDtoConverter;
+import ru.yusof.converter.Converter;
 import ru.yusof.dao.UserDao;
 import ru.yusof.dao.UserModel;
 import ru.yusof.exceptions.BadCredentialsException;
-import ru.yusof.exceptions.CustomException;
 
 public class AuthorizationService {
     private final UserDao userDao;
     private final DigestService digestService;
-    private final UserModelToUserDtoConverter userDtoConverter;
+    private final Converter<UserModel, UserDTO> userDtoConverter;
     private int clientId;
 
-    public AuthorizationService(UserDao userDao, DigestService digestService, UserModelToUserDtoConverter userDtoConverter) {
+    public AuthorizationService(UserDao userDao, DigestService digestService, Converter<UserModel, UserDTO> userDtoConverter) {
         this.userDao = userDao;
         this.digestService = digestService;
         this.userDtoConverter = userDtoConverter;
