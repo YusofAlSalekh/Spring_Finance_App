@@ -69,4 +69,19 @@ public class DaoFactory {
             throw new RuntimeException(e);
         }
     }
+    public static void resetDataSource() {
+        dataSource = null;
+    }
+
+    public static void resetAccountDao() {
+        accountDao = null;
+    }
+
+    public static void resetTransactionDao() {
+        transactionDao = null;
+    }
+
+    public static void resetUserDao() {
+        userDao = null;
+    }
 }

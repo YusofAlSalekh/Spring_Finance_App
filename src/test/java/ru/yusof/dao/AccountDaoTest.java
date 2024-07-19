@@ -1,5 +1,6 @@
 package ru.yusof.dao;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yusof.exceptions.CreatingAccountException;
@@ -7,6 +8,7 @@ import ru.yusof.exceptions.DeletionAccountException;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,8 +16,8 @@ class AccountDaoTest {
     AccountDao subj;
 
     @BeforeEach
-    void setUp() {
-        System.setProperty("jdbcUrl", "jdbc:h2:mem:test_mem");
+    public void setUp() {
+        System.setProperty("jdbcUrl", "jdbc:h2:mem:test_mem" + UUID.randomUUID().toString());
         System.setProperty("jdbcUser", "postgres");
         System.setProperty("jdbcPassword", "");
         System.setProperty("liquibaseFile", "liquibase_account_dao_test.xml");
@@ -23,6 +25,11 @@ class AccountDaoTest {
         subj = DaoFactory.getAccountDao();
     }
 
+    @AfterEach
+    public void after(){
+        DaoFactory.resetDataSource();
+        DaoFactory.resetAccountDao();
+    }
     @Test
     void findByClientID_AccountExists() {
         subj.createAccount("yusof", 100, 1);

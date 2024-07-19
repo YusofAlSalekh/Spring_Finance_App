@@ -1,10 +1,12 @@
 package ru.yusof.dao;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yusof.exceptions.AlreadyExistsException;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,13 +14,19 @@ class UserDaoTest {
     UserDao subj;
 
     @BeforeEach
-    void setUp() {
-        System.setProperty("jdbcUrl", "jdbc:h2:mem:test_mem");
+    public void setUp() {
+        System.setProperty("jdbcUrl", "jdbc:h2:mem:test_mem" + UUID.randomUUID().toString());
         System.setProperty("jdbcUser", "postgres");
         System.setProperty("jdbcPassword", "");
         System.setProperty("liquibaseFile", "liquibase_user_dao_test.xml");
 
         subj = DaoFactory.getUserDao();
+    }
+
+    @AfterEach
+    public void after() {
+        DaoFactory.resetDataSource();
+        DaoFactory.resetUserDao();
     }
 
     @Test

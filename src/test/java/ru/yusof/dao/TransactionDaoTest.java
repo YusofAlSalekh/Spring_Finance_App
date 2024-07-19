@@ -1,5 +1,6 @@
 package ru.yusof.dao;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yusof.exceptions.*;
@@ -8,22 +9,29 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class TransactionDaoTest {
     TransactionDao subj;
     LocalDate startDate = LocalDate.of(2024, 7, 1);
-    LocalDate endDate = LocalDate.of(2024, 7, 19);
+    LocalDate endDate = LocalDate.of(2025, 7, 1);
 
     @BeforeEach
     void setUp() {
-        System.setProperty("jdbcUrl", "jdbc:h2:mem:test_mem");
+        System.setProperty("jdbcUrl", "jdbc:h2:mem:test_mem" + UUID.randomUUID().toString());
         System.setProperty("jdbcUser", "postgres");
         System.setProperty("jdbcPassword", "");
         System.setProperty("liquibaseFile", "liquibase_transaction_dao_test.xml");
 
         subj = DaoFactory.getTransactionTypeDao();
+    }
+
+    @AfterEach
+    public void after(){
+        DaoFactory.resetDataSource();
+        DaoFactory.resetTransactionDao();
     }
 
     @Test
