@@ -45,7 +45,7 @@ class UserDaoTest {
     void findByEmailAndHash_notFound() {
         Optional<UserModel> user = subj.findByEmailAndHash("yusof@mail.ru", "202cb962ac59075b964b07152d234b71");
 
-        assertTrue(user.isEmpty());
+        assertFalse(user.isPresent());
     }
 
     @Test()
