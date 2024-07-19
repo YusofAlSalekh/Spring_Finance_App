@@ -8,10 +8,11 @@
     <url>http://maven.apache.org</url>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.5</version>
+            <version>42.7.2</version>
         </dependency>
 
         <dependency>
@@ -23,7 +24,7 @@
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.11</version>
+            <version>1.13</version>
         </dependency>
 
         <dependency>
