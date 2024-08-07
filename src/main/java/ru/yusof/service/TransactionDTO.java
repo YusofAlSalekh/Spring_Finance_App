@@ -1,9 +1,14 @@
 package ru.yusof.service;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+
 public class TransactionDTO {
     private int id;
-    private String name;
-    private int client_id;
+    private Timestamp createdDate;
+    private BigDecimal amount;
+    private int senderAccountId;
+    private int receiverAccountId;
 
     public int getId() {
         return id;
@@ -13,19 +18,35 @@ public class TransactionDTO {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public Timestamp getCreatedDate() {
+        return createdDate;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setCreatedDate(Timestamp createdDate) {
+        this.createdDate = createdDate;
     }
 
-    public int getClient_id() {
-        return client_id;
+    public BigDecimal getAmount() {
+        return amount;
     }
 
-    public void setClient_id(int client_id) {
-        this.client_id = client_id;
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public int getSenderAccountId() {
+        return senderAccountId;
+    }
+
+    public void setSenderAccountId(int senderAccountId) {
+        this.senderAccountId = senderAccountId;
+    }
+
+    public int getReceiverAccountId() {
+        return receiverAccountId;
+    }
+
+    public void setReceiverAccountId(int receiverAccountId) {
+        this.receiverAccountId = receiverAccountId;
     }
 }

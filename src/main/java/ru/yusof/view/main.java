@@ -75,7 +75,7 @@ public class main {
 
     private static void createNewAccount(AccountService accountService, int clientId) {
         String accountName = requestString("Enter the account name:");
-        double initialBalance = requestDouble("Enter the initial balance:");
+        BigDecimal initialBalance = requestBigDecimal("Enter the initial balance:");
 
         accountService.createAccount(accountName, initialBalance, clientId);
         System.out.println("New account has been created successfully!");
@@ -87,17 +87,17 @@ public class main {
         System.out.println("Account has been deleted successfully");
     }
 
-    private static void deleteTransactionType(TransactionService transactionService, int clientId) {
-        int transactionTypeId = requestInt("Enter the Transaction Type id:");
-        boolean result = transactionService.deleteTransactionType(transactionTypeId, clientId);
+    private static void deleteTransactionCategory(TransactionCategoryService transactionCategoryService, int clientId) {
+        int transactionCategoryId = requestInt("Enter the Transaction Type id:");
+        boolean result = transactionCategoryService.deleteTransactionCategory(transactionCategoryId, clientId);
         if (result) {
             System.out.println("Category has been deleted");
         }
     }
 
-    private static void createTransactionType(TransactionService transactionService, int clientId) {
+    private static void createTransactionCategory(TransactionCategoryService transactionCategoryService, int clientId) {
         String transactionName = requestString("Enter the category name:");
-        transactionService.createCategory(transactionName, clientId);
+        transactionCategoryService.createCategory(transactionName, clientId);
         System.out.println("New category created successfully!");
     }
 
@@ -117,7 +117,8 @@ public class main {
 
             int dashboardChoice = requestInt("Enter your choice:");
             AccountService accountService = ServiceFactory.getAccountService();
-            TransactionService transactionService = ServiceFactory.getTransactionTypeService();
+            TransactionService transactionService = ServiceFactory.getTransactionService();
+            TransactionCategoryService transactionCategoryService = ServiceFactory.getTransactionCategoryService();
 
             switch (dashboardChoice) {
                 case 1:
@@ -130,13 +131,13 @@ public class main {
                     deleteAccount(accountService, clientId);
                     break;
                 case 4:
-                    createTransactionType(transactionService, clientId);
+                    createTransactionCategory(transactionCategoryService, clientId);
                     break;
                 case 5:
-                    deleteTransactionType(transactionService, clientId);
+                    deleteTransactionCategory(transactionCategoryService, clientId);
                     break;
                 case 6:
-                    editTransactionType(transactionService, clientId);
+                    editTransactionCategory(transactionCategoryService, clientId);
                     break;
                 case 7:
                     getInformationByIncome(transactionService, clientId);
@@ -166,10 +167,10 @@ public class main {
         System.out.println("Transaction completed successfully!");
     }
 
-    private static void editTransactionType(TransactionService transactionService, int clientId) {
+    private static void editTransactionCategory(TransactionCategoryService transactionCategoryService, int clientId) {
         int accountId = requestInt("Enter the Transaction Type id:");
         String newName = requestString("Enter new Name for Transaction Type");
-        boolean result = transactionService.editTransactionType(newName, accountId, clientId);
+        boolean result = transactionCategoryService.editTransactionCategory(newName, accountId, clientId);
         if (result) {
             System.out.println("Transaction Type has been edited");
         }

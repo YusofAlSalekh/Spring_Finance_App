@@ -10,7 +10,7 @@
 
     <include file="liquibase.xml" />
 
-    <changeSet id="testTransactionCategoryDao" author="yus">
+    <changeSet id="testTransactionTypeDao" author="yus">
 
         <insert tableName="client">
             <column name="id" value="1"/>

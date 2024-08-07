@@ -9,7 +9,7 @@ create table account
 (
     id        SERIAL PRIMARY KEY,
     name      varchar(255) NOT NULL,
-    balance   integer      NOT NULL,
+    balance   decimal(10, 2) NOT NULL,
     client_id int references client (id),
     unique (name, client_id)
 );
@@ -25,6 +25,7 @@ create table category
 
 
 create table transaction
+
 (
     id                  SERIAL PRIMARY KEY,
     created_date        timestamp      NOT NULL,

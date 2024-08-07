@@ -9,6 +9,7 @@ public class ServiceFactory {
     private static AuthorizationService authorizationService;
     private static AccountService accountService;
     private static TransactionService transactionService;
+    private static TransactionCategoryService transactionCategoryService;
     private static DigestService digestService;
 
     public static AuthorizationService getAuthorizationService() {
@@ -39,13 +40,23 @@ public class ServiceFactory {
         return accountService;
     }
 
-    public static TransactionService getTransactionTypeService() {
+    public static TransactionService getTransactionService() {
         if (transactionService == null) {
             transactionService = new TransactionService(
-                    DaoFactory.getTransactionTypeDao(),
-                    getTransactionTypeModelToTransactionDtoConverter()
+                    DaoFactory.getTransactionDao(),
+                    getTransactionModelToTransactionDtoConverter()
             );
         }
         return transactionService;
+    }
+
+    public static TransactionCategoryService getTransactionCategoryService() {
+        if (transactionCategoryService == null) {
+            transactionCategoryService = new TransactionCategoryService(
+                    DaoFactory.getTransactionCategoryDao(),
+                    getTransactionCategoryModelToTransactionCategoryDtoConverter()
+            );
+        }
+        return transactionCategoryService;
     }
 }

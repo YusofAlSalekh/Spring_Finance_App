@@ -11,6 +11,7 @@ import ru.yusof.dao.AccountModel;
 import ru.yusof.exceptions.CreatingAccountException;
 import ru.yusof.exceptions.DeletionAccountException;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -33,14 +34,14 @@ class AccountServiceTest {
     void viewAccount() {
         AccountModel accountModel = new AccountModel();
         accountModel.setId(1);
-        accountModel.setBalance(100);
+        accountModel.setBalance(new BigDecimal("100.00"));
         accountModel.setName("yusof");
         accountModel.setClient_id(1);
         List<AccountModel> accountModels = Arrays.asList(accountModel);
         when(accountDao.findByClientID(1)).thenReturn(accountModels);
 
         AccountDTO accountDTO = new AccountDTO();
-        accountDTO.setBalance(100);
+        accountDTO.setBalance(new BigDecimal("100.00"));
         accountDTO.setClient_id(1);
         accountDTO.setId(1);
         accountDTO.setName("yusof");
@@ -69,35 +70,35 @@ class AccountServiceTest {
     void accountCreated() {
         AccountModel accountModel = new AccountModel();
         accountModel.setId(10);
-        accountModel.setBalance(100);
+        accountModel.setBalance(new BigDecimal("100.00"));
         accountModel.setName("yusoff");
         accountModel.setClient_id(10);
-        when(accountDao.createAccount("yusoff", 100, 10)).thenReturn(accountModel);
+        when(accountDao.createAccount("yusoff", new BigDecimal("100.00"), 10)).thenReturn(accountModel);
 
         AccountDTO accountDTO = new AccountDTO();
         accountDTO.setId(10);
-        accountDTO.setBalance(100);
+        accountDTO.setBalance(new BigDecimal("100.00"));
         accountDTO.setName("yusoff");
         accountDTO.setClient_id(10);
         when(accountDtoConverter.convert(accountModel)).thenReturn(accountDTO);
 
-        AccountDTO account = subj.createAccount("yusoff", 100, 10);
+        AccountDTO account = subj.createAccount("yusoff", new BigDecimal("100.00"), 10);
         assertNotNull(account);
         assertEquals(account, accountDTO);
 
         verify(accountDtoConverter, times(1)).convert(accountModel);
-        verify(accountDao, times(1)).createAccount("yusoff", 100, 10);
+        verify(accountDao, times(1)).createAccount("yusoff", new BigDecimal("100.00"), 10);
     }
 
     @Test
     void accountWasNotCreatedSomethingWentWrong() {
-        when(accountDao.createAccount("yusoff", 100, 10)).thenThrow(new CreatingAccountException("Something went wrong during creating account. Please, try again later"));
+        when(accountDao.createAccount("yusoff", new BigDecimal("100.00"), 10)).thenThrow(new CreatingAccountException("Something went wrong during creating account. Please, try again later"));
 
         assertThrows(CreatingAccountException.class, () ->
-                        subj.createAccount("yusoff", 100, 10),
+                        subj.createAccount("yusoff", new BigDecimal("100.00"), 10),
                 "Something went wrong during creating account. Please, try again later");
 
-        verify(accountDao, times(1)).createAccount("yusoff", 100, 10);
+        verify(accountDao, times(1)).createAccount("yusoff", new BigDecimal("100.00"), 10);
         verifyNoInteractions(accountDtoConverter);
     }
 

@@ -19,6 +19,7 @@ public class DaoFactory {
     private static AccountDao accountDao;
     private static TransactionDao transactionDao;
     private static DataSource dataSource;
+    private static TransactionCategoryDao transactionCategoryDao;
 
     public static UserDao getUserDao() {
         if (userDao == null) {
@@ -34,11 +35,18 @@ public class DaoFactory {
         return accountDao;
     }
 
-    public static TransactionDao getTransactionTypeDao() {
+    public static TransactionDao getTransactionDao() {
         if (transactionDao == null) {
             transactionDao = new TransactionDao(getDataSource());
         }
         return transactionDao;
+    }
+
+    public static TransactionCategoryDao getTransactionCategoryDao() {
+        if (transactionCategoryDao == null) {
+            transactionCategoryDao = new TransactionCategoryDao(getDataSource());
+        }
+        return transactionCategoryDao;
     }
 
     public static DataSource getDataSource() {
@@ -63,12 +71,12 @@ public class DaoFactory {
                     new ClassLoaderResourceAccessor(),
                     database
             );
-
             liquibase.update(new Contexts());
         } catch (SQLException | LiquibaseException e) {
             throw new RuntimeException(e);
         }
     }
+
     public static void resetDataSource() {
         dataSource = null;
     }
@@ -77,11 +85,22 @@ public class DaoFactory {
         accountDao = null;
     }
 
+    public static void resetTransactionCategoryDao() {
+        transactionCategoryDao = null;
+    }
+
     public static void resetTransactionDao() {
         transactionDao = null;
     }
 
     public static void resetUserDao() {
+        userDao = null;
+    }
+
+    public static void resetDao() {
+        accountDao = null;
+        transactionDao = null;
+        transactionCategoryDao = null;
         userDao = null;
     }
 }

@@ -3,7 +3,9 @@ package ru.yusof.dao;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yusof.exceptions.*;
+import ru.yusof.exceptions.GetExpenseByCategoryException;
+import ru.yusof.exceptions.GetIncomeByCategoryException;
+import ru.yusof.exceptions.InsufficientFundsException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -25,65 +27,17 @@ class TransactionDaoTest {
         System.setProperty("jdbcPassword", "");
         System.setProperty("liquibaseFile", "liquibase_transaction_dao_test.xml");
 
-        subj = DaoFactory.getTransactionTypeDao();
+        subj = DaoFactory.getTransactionDao();
     }
 
     @AfterEach
-    public void after(){
+    public void after() {
         DaoFactory.resetDataSource();
-        DaoFactory.resetTransactionDao();
+        DaoFactory.resetDao();
     }
 
     @Test
-    void createTransactionType_TransactionTypeWasNotCreated() {
-        assertThrows(CreatingTransactionTypeException.class, () -> {
-            subj.createTransactionType("school", 3);
-        });
-    }
-
-    @Test
-    void createTransactionType_TransactionTypeWasCreated() {
-        TransactionTypeModel createdTransactionType = subj.createTransactionType("something", 1);
-
-        assertNotNull(createdTransactionType);
-        assertEquals("something", createdTransactionType.getName());
-        assertEquals(1, createdTransactionType.getClientId());
-    }
-
-    @Test
-    void deleteTransactionType_TransactionTypeWasNotDeleted() {
-        assertThrows(DeletionTransactionTypeException.class, () -> {
-            subj.deleteTransactionType(1, 100);
-        });
-    }
-
-    @Test
-    void deleteTransactionType_TransactionTypeWasDeleted() {
-        boolean result = subj.deleteTransactionType(2, 1);
-
-        assertTrue(result);
-
-        assertThrows(DeletionTransactionTypeException.class, () -> {
-            subj.deleteTransactionType(2, 1);
-        });
-    }
-
-    @Test
-    void editTransactionType_TransactionTypeWasNotEdited() {
-        assertThrows(AddingTransactionTypeException.class, () -> {
-            subj.editTransactionType("health", 1, 100);
-        });
-    }
-
-    @Test
-    void editTransactionType_TransactionTypeWasEdited() {
-        boolean result = subj.editTransactionType("health", 2, 1);
-
-        assertTrue(result);
-    }
-
-    @Test
-    void fetchExpenseByCategory_WasFetched() {
+    void fetchExpenseByCategory_wasFetched() {
         BigDecimal bigDecimalValue = new BigDecimal("10.00");
         List<Integer> categoryIds = new ArrayList<>();
 
@@ -100,14 +54,14 @@ class TransactionDaoTest {
     }
 
     @Test
-    void fetchExpenseByCategory_WasNotFetched() {
+    void fetchExpenseByCategory_wasNotFetched() {
         assertThrows(GetExpenseByCategoryException.class, () -> {
-            subj.fetchExpenseByCategory(100, startDate, endDate);
+            subj.fetchExpenseByCategory(1, startDate, endDate);
         });
     }
 
     @Test
-    void fetchIncomeByCategory_WasFetched() {
+    void fetchIncomeByCategory_wasFetched() {
         BigDecimal bigDecimalValue = new BigDecimal("10.00");
         List<Integer> categoryIds = new ArrayList<>();
 
@@ -123,40 +77,10 @@ class TransactionDaoTest {
     }
 
     @Test
-    void fetchIncomeByCategory_NoRecordsFound() {
-        List<CategoryAmountModel> result = subj.fetchIncomeByCategory(1, startDate, endDate);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void fetchExpanseByCategory_NoRecordsFound() {
-        List<CategoryAmountModel> result = subj.fetchExpenseByCategory(2, startDate, endDate);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void fetchIncomeByCategory_WasNotFetched() {
+    void fetchIncomeByCategory_wasNotFetched() {
         assertThrows(GetIncomeByCategoryException.class, () -> {
-            subj.fetchIncomeByCategory(100, startDate, endDate);
+            subj.fetchIncomeByCategory(1, startDate, endDate);
         });
-    }
-
-    @Test
-    void clientIdExists() {
-        boolean result = subj.clientIdExists(1);
-
-        assertTrue(result);
-    }
-
-    @Test
-    void clientIdDoesNotExist() {
-        boolean result = subj.clientIdExists(3);
-
-        assertFalse(result);
     }
 
     @Test
@@ -166,11 +90,9 @@ class TransactionDaoTest {
         BigDecimal bigDecimalValue30 = new BigDecimal("30.00");
         List<Integer> categoryIds = new ArrayList<>();
 
-        // Add initial category ID
         categoryIds.add(2);
         subj.addTransaction(2, 1, bigDecimalValue10, categoryIds);
 
-        // Check expenses after first transaction
         List<CategoryAmountModel> expenseResults = subj.fetchExpenseByCategory(2, startDate, endDate);
 
         assertNotNull(expenseResults);
@@ -182,11 +104,9 @@ class TransactionDaoTest {
         assertEquals(1, expenseResults.size());
         assertEquals("education", expenseResults.get(0).getCategoryName());
 
-        // Add another category ID and perform second transaction
         categoryIds.add(3);
         subj.addTransaction(2, 1, bigDecimalValue20, categoryIds);
 
-        // Check expenses after second transaction
         expenseResults = subj.fetchExpenseByCategory(2, startDate, endDate);
 
         assertNotNull(expenseResults);

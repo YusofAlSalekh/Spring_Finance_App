@@ -4,6 +4,7 @@ import ru.yusof.converter.Converter;
 import ru.yusof.dao.AccountDao;
 import ru.yusof.dao.AccountModel;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class AccountService {
         return accountDTOs;
     }
 
-    public AccountDTO createAccount(String accountName, double balance, int clientId) {
+    public AccountDTO createAccount(String accountName, BigDecimal balance, int clientId) {
         AccountModel accountModel = accountDao.createAccount(accountName, balance, clientId);
         return accountDtoConverter.convert(accountModel);
     }

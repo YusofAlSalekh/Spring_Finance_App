@@ -26,7 +26,7 @@ class UserDaoTest {
     @AfterEach
     public void after() {
         DaoFactory.resetDataSource();
-        DaoFactory.resetUserDao();
+        DaoFactory.resetDao();
     }
 
     @Test

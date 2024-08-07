@@ -1,6 +1,6 @@
 package ru.yusof.dao;
 
-public class TransactionTypeModel {
+public class TransactionCategoryModel {
     private int id;
     private String name;
     private int clientId;
