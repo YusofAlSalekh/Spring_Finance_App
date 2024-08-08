@@ -1,11 +1,12 @@
 package ru.yusof.service;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 public class AccountDTO {
     private int id;
     private String name;
-    private double balance;
+    private BigDecimal balance;
     private int client_id;
 
     public int getId() {
@@ -24,11 +25,11 @@ public class AccountDTO {
         this.name = name;
     }
 
-    public double getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public void setBalance(double balance) {
+    public void setBalance(BigDecimal balance) {
         this.balance = balance;
     }
 

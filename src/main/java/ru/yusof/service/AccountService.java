@@ -1,17 +1,18 @@
 package ru.yusof.service;
 
-import ru.yusof.converter.AccountModelToAccountDtoConverter;
+import ru.yusof.converter.Converter;
 import ru.yusof.dao.AccountDao;
 import ru.yusof.dao.AccountModel;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AccountService {
     private final AccountDao accountDao;
-    private final AccountModelToAccountDtoConverter accountDtoConverter;
+    private final Converter<AccountModel, AccountDTO> accountDtoConverter;
 
-    public AccountService(AccountDao accountDao, AccountModelToAccountDtoConverter accountDtoConverter) {
+    public AccountService(AccountDao accountDao, Converter<AccountModel, AccountDTO> accountDtoConverter) {
         this.accountDao = accountDao;
         this.accountDtoConverter = accountDtoConverter;
     }
@@ -26,7 +27,7 @@ public class AccountService {
         return accountDTOs;
     }
 
-    public AccountDTO createAccount(String accountName, double balance, int clientId) {
+    public AccountDTO createAccount(String accountName, BigDecimal balance, int clientId) {
         AccountModel accountModel = accountDao.createAccount(accountName, balance, clientId);
         return accountDtoConverter.convert(accountModel);
     }

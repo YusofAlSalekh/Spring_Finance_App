@@ -1,44 +1,62 @@
 package ru.yusof.service;
 
-import ru.yusof.converter.AccountModelToAccountDtoConverter;
-import ru.yusof.converter.TransactionTypeModelToTransactionDtoConverter;
-import ru.yusof.converter.UserModelToUserDtoConverter;
 import ru.yusof.dao.DaoFactory;
+
+import static ru.yusof.converter.ConverterFactory.*;
+import static ru.yusof.dao.DaoFactory.getUserDao;
 
 public class ServiceFactory {
     private static AuthorizationService authorizationService;
     private static AccountService accountService;
-    private static TransactionTypeService transactionTypeService;
-
+    private static TransactionService transactionService;
+    private static TransactionCategoryService transactionCategoryService;
+    private static DigestService digestService;
 
     public static AuthorizationService getAuthorizationService() {
         if (authorizationService == null) {
             authorizationService = new AuthorizationService(
-                    DaoFactory.getUserDao(),
-                    new Md5DigestService(),
-                    new UserModelToUserDtoConverter()
+                    getUserDao(),
+                    getDigestService(),
+                    getUserModelToUserDtoConverter()
             );
         }
         return authorizationService;
+    }
+
+    public static DigestService getDigestService() {
+        if (digestService == null) {
+            digestService = new Md5DigestService();
+        }
+        return digestService;
     }
 
     public static AccountService getAccountService() {
         if (accountService == null) {
             accountService = new AccountService(
                     DaoFactory.getAccountDao(),
-                    new AccountModelToAccountDtoConverter()
+                    getAccountModelToAccountDtoConverter()
             );
         }
         return accountService;
     }
 
-    public static TransactionTypeService getTransactionTypeService() {
-        if (transactionTypeService == null) {
-            transactionTypeService = new TransactionTypeService(
-                    DaoFactory.getTransactionTypeDao(),
-                    new TransactionTypeModelToTransactionDtoConverter()
+    public static TransactionService getTransactionService() {
+        if (transactionService == null) {
+            transactionService = new TransactionService(
+                    DaoFactory.getTransactionDao(),
+                    getTransactionModelToTransactionDtoConverter()
             );
         }
-        return transactionTypeService;
+        return transactionService;
+    }
+
+    public static TransactionCategoryService getTransactionCategoryService() {
+        if (transactionCategoryService == null) {
+            transactionCategoryService = new TransactionCategoryService(
+                    DaoFactory.getTransactionCategoryDao(),
+                    getTransactionCategoryModelToTransactionCategoryDtoConverter()
+            );
+        }
+        return transactionCategoryService;
     }
 }

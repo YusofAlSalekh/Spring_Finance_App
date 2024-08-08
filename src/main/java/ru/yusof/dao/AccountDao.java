@@ -5,6 +5,7 @@ import ru.yusof.exceptions.CustomException;
 import ru.yusof.exceptions.DeletionAccountException;
 
 import javax.sql.DataSource;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,8 +19,8 @@ import static java.sql.Statement.RETURN_GENERATED_KEYS;
 public class AccountDao {
     private final DataSource dataSource;
 
-    public AccountDao() {
-        this.dataSource = DatabaseManager.getDataSource();
+    public AccountDao(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     public List<AccountModel> findByClientID(int clientId) {
@@ -36,7 +37,7 @@ public class AccountDao {
                 AccountModel accountModel = new AccountModel();
                 accountModel.setId(resultSet.getInt("id"));
                 accountModel.setName(resultSet.getString("name"));
-                accountModel.setBalance(resultSet.getInt("balance"));
+                accountModel.setBalance(resultSet.getBigDecimal("balance"));
                 accountModel.setClient_id(resultSet.getInt("client_id"));
                 accountModels.add(accountModel);
             }
@@ -49,13 +50,13 @@ public class AccountDao {
         }
     }
 
-    public AccountModel createAccount(String accountName, double balance, int clientId) {
+    public AccountModel createAccount(String accountName, BigDecimal balance, int clientId) {
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement =
                     connection.prepareStatement("insert into account (name,balance,client_id) values (?,?,?)"
                             , RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, accountName);
-            preparedStatement.setDouble(2, balance);
+            preparedStatement.setBigDecimal(2, balance);
             preparedStatement.setInt(3, clientId);
             preparedStatement.executeUpdate();
 

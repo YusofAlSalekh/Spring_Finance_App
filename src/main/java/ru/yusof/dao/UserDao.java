@@ -13,8 +13,8 @@ import static java.sql.Statement.RETURN_GENERATED_KEYS;
 public class UserDao {
     private final DataSource dataSource;
 
-    public UserDao() {
-        this.dataSource = DatabaseManager.getDataSource();
+    public UserDao(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     public Optional<UserModel> findByEmailAndHash(String email, String hash) {
