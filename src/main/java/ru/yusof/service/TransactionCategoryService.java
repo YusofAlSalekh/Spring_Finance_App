@@ -1,9 +1,11 @@
 package ru.yusof.service;
 
+import org.springframework.stereotype.Service;
 import ru.yusof.converter.Converter;
 import ru.yusof.dao.TransactionCategoryDao;
 import ru.yusof.dao.TransactionCategoryModel;
 
+@Service
 public class TransactionCategoryService {
     private final TransactionCategoryDao transactionCategoryDao;
     private final Converter<TransactionCategoryModel, TransactionCategoryDTO> transactionCategoryDTOConverter;

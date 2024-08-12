@@ -1,8 +1,10 @@
 package ru.yusof.converter;
 
+import org.springframework.stereotype.Service;
 import ru.yusof.dao.TransactionModel;
 import ru.yusof.service.TransactionDTO;
 
+@Service
 public class TransactionModelToTransactionDtoConverter<S, T> implements Converter<TransactionModel, TransactionDTO> {
 
     @Override

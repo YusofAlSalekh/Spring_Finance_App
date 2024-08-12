@@ -1,8 +1,9 @@
 package ru.yusof.dao;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import ru.yusof.exceptions.AlreadyExistsException;
 
 import java.util.Optional;
@@ -12,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserDaoTest {
     UserDao subj;
+    ApplicationContext context;
 
     @BeforeEach
     public void setUp() {
@@ -20,13 +22,8 @@ class UserDaoTest {
         System.setProperty("jdbcPassword", "");
         System.setProperty("liquibaseFile", "liquibase_user_dao_test.xml");
 
-        subj = DaoFactory.getUserDao();
-    }
-
-    @AfterEach
-    public void after() {
-        DaoFactory.resetDataSource();
-        DaoFactory.resetDao();
+        context = new AnnotationConfigApplicationContext("ru.yusof");
+        subj = context.getBean(UserDao.class);
     }
 
     @Test

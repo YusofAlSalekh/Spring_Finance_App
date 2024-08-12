@@ -1,5 +1,7 @@
 package ru.yusof.view;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import ru.yusof.dao.CategoryAmountModel;
 import ru.yusof.service.*;
 
@@ -12,11 +14,12 @@ import java.util.List;
 import java.util.Scanner;
 
 public class main {
+    static ApplicationContext context = new AnnotationConfigApplicationContext("ru.yusof");
     private static final Scanner scanner = new Scanner(System.in);
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public static void main(String[] args) {
-        AuthorizationService authorizationService = ServiceFactory.getAuthorizationService();
+        AuthorizationService authorizationService = context.getBean(AuthorizationService.class);
 
         while (true) {
             try {
@@ -116,9 +119,9 @@ public class main {
             System.out.println("10. Logout");
 
             int dashboardChoice = requestInt("Enter your choice:");
-            AccountService accountService = ServiceFactory.getAccountService();
-            TransactionService transactionService = ServiceFactory.getTransactionService();
-            TransactionCategoryService transactionCategoryService = ServiceFactory.getTransactionCategoryService();
+            AccountService accountService = context.getBean(AccountService.class);
+            TransactionService transactionService = context.getBean(TransactionService.class);
+            TransactionCategoryService transactionCategoryService = context.getBean(TransactionCategoryService.class);
 
             switch (dashboardChoice) {
                 case 1:
@@ -163,7 +166,7 @@ public class main {
         BigDecimal amount = requestBigDecimal("Enter the amount:");
         List<Integer> categoryIds = requestCategoryIds();
 
-        transactionService.performTransaction(senderAccountId, receiverAccountId, amount, categoryIds);
+        transactionService.performTransaction(senderAccountId, receiverAccountId, clientId, amount, categoryIds);
         System.out.println("Transaction completed successfully!");
     }
 

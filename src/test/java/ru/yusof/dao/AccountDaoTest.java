@@ -1,8 +1,9 @@
 package ru.yusof.dao;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import ru.yusof.exceptions.DeletionAccountException;
 
 import java.math.BigDecimal;
@@ -14,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AccountDaoTest {
     AccountDao subj;
+    ApplicationContext context;
 
     @BeforeEach
     public void setUp() {
@@ -22,13 +24,8 @@ class AccountDaoTest {
         System.setProperty("jdbcPassword", "");
         System.setProperty("liquibaseFile", "liquibase_account_dao_test.xml");
 
-        subj = DaoFactory.getAccountDao();
-    }
-
-    @AfterEach
-    public void after() {
-        DaoFactory.resetDataSource();
-        DaoFactory.resetDao();
+        context = new AnnotationConfigApplicationContext("ru.yusof");
+        subj = context.getBean(AccountDao.class);
     }
 
     @Test

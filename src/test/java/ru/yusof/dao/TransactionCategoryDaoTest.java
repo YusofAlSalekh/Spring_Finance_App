@@ -1,8 +1,9 @@
 package ru.yusof.dao;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import ru.yusof.exceptions.AddingTransactionCategoryException;
 import ru.yusof.exceptions.DeletionTransactionCategoryException;
 
@@ -12,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TransactionCategoryDaoTest {
     TransactionCategoryDao subj;
+    ApplicationContext context;
 
     @BeforeEach
     void setUp() {
@@ -20,13 +22,8 @@ class TransactionCategoryDaoTest {
         System.setProperty("jdbcPassword", "");
         System.setProperty("liquibaseFile", "liquibase_transaction_category_dao_test.xml");
 
-        subj = DaoFactory.getTransactionCategoryDao();
-    }
-
-    @AfterEach
-    public void after() {
-        DaoFactory.resetDataSource();
-        DaoFactory.resetDao();
+        context = new AnnotationConfigApplicationContext("ru.yusof");
+        subj = context.getBean(TransactionCategoryDao.class);
     }
 
     @Test

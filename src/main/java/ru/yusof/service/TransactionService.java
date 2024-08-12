@@ -1,5 +1,6 @@
 package ru.yusof.service;
 
+import org.springframework.stereotype.Service;
 import ru.yusof.converter.Converter;
 import ru.yusof.dao.CategoryAmountModel;
 import ru.yusof.dao.TransactionDao;
@@ -9,6 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+@Service
 public class TransactionService {
     private final TransactionDao transactionDao;
     private final Converter<TransactionModel, TransactionDTO> transactionModelToTransactionDtoConverter;
@@ -26,7 +28,7 @@ public class TransactionService {
         return transactionDao.fetchExpenseByCategory(clientId, start, end);
     }
 
-    public void performTransaction(int senderAccountId, int receiverAccountId, BigDecimal amount, List<Integer> categoryIds) {
-        transactionDao.addTransaction(senderAccountId, receiverAccountId, amount, categoryIds);
+    public void performTransaction(int senderAccountId, int receiverAccountId, int clientId, BigDecimal amount, List<Integer> categoryIds) {
+        transactionDao.addTransaction(senderAccountId, receiverAccountId, clientId, amount, categoryIds);
     }
 }
