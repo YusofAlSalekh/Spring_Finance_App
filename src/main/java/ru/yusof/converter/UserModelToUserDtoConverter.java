@@ -1,8 +1,10 @@
 package ru.yusof.converter;
 
+import org.springframework.stereotype.Service;
 import ru.yusof.dao.UserModel;
 import ru.yusof.service.UserDTO;
 
+@Service
 public class UserModelToUserDtoConverter<S, T> implements Converter<UserModel, UserDTO> {
 
     @Override

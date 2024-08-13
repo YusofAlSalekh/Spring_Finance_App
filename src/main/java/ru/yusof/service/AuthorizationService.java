@@ -1,10 +1,12 @@
 package ru.yusof.service;
 
+import org.springframework.stereotype.Service;
 import ru.yusof.converter.Converter;
 import ru.yusof.dao.UserDao;
 import ru.yusof.dao.UserModel;
 import ru.yusof.exceptions.BadCredentialsException;
 
+@Service
 public class AuthorizationService {
     private final UserDao userDao;
     private final DigestService digestService;

@@ -1,8 +1,9 @@
 package ru.yusof.dao;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import ru.yusof.exceptions.GetExpenseByCategoryException;
 import ru.yusof.exceptions.GetIncomeByCategoryException;
 import ru.yusof.exceptions.InsufficientFundsException;
@@ -17,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TransactionDaoTest {
     TransactionDao subj;
+    ApplicationContext context;
     LocalDate startDate = LocalDate.of(2024, 7, 1);
     LocalDate endDate = LocalDate.of(2025, 7, 1);
 
@@ -27,13 +29,8 @@ class TransactionDaoTest {
         System.setProperty("jdbcPassword", "");
         System.setProperty("liquibaseFile", "liquibase_transaction_dao_test.xml");
 
-        subj = DaoFactory.getTransactionDao();
-    }
-
-    @AfterEach
-    public void after() {
-        DaoFactory.resetDataSource();
-        DaoFactory.resetDao();
+        context = new AnnotationConfigApplicationContext("ru.yusof");
+        subj = context.getBean(TransactionDao.class);
     }
 
     @Test
@@ -42,7 +39,7 @@ class TransactionDaoTest {
         List<Integer> categoryIds = new ArrayList<>();
 
         categoryIds.add(2);
-        subj.addTransaction(2, 1, bigDecimalValue, categoryIds);
+        subj.addTransaction(2, 1, 2, bigDecimalValue, categoryIds);
 
         List<CategoryAmountModel> result = subj.fetchExpenseByCategory(2, startDate, endDate);
 
@@ -66,7 +63,7 @@ class TransactionDaoTest {
         List<Integer> categoryIds = new ArrayList<>();
 
         categoryIds.add(2);
-        subj.addTransaction(2, 1, bigDecimalValue, categoryIds);
+        subj.addTransaction(2, 1, 2, bigDecimalValue, categoryIds);
         List<CategoryAmountModel> result = subj.fetchIncomeByCategory(1, startDate, endDate);
 
         assertNotNull(result);
@@ -91,7 +88,7 @@ class TransactionDaoTest {
         List<Integer> categoryIds = new ArrayList<>();
 
         categoryIds.add(2);
-        subj.addTransaction(2, 1, bigDecimalValue10, categoryIds);
+        subj.addTransaction(2, 1, 2, bigDecimalValue10, categoryIds);
 
         List<CategoryAmountModel> expenseResults = subj.fetchExpenseByCategory(2, startDate, endDate);
 
@@ -105,7 +102,7 @@ class TransactionDaoTest {
         assertEquals("education", expenseResults.get(0).getCategoryName());
 
         categoryIds.add(3);
-        subj.addTransaction(2, 1, bigDecimalValue20, categoryIds);
+        subj.addTransaction(2, 1, 2, bigDecimalValue20, categoryIds);
 
         expenseResults = subj.fetchExpenseByCategory(2, startDate, endDate);
 
@@ -126,7 +123,7 @@ class TransactionDaoTest {
         categoryIds.add(2);
         assertThrows(InsufficientFundsException.class,
                 () -> {
-                    subj.addTransaction(2, 1, amount, categoryIds);
+                    subj.addTransaction(2, 1, 2, amount, categoryIds);
                 });
     }
 }

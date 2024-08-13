@@ -1,8 +1,9 @@
 package ru.yusof.dao;
 
+import org.springframework.stereotype.Service;
 import ru.yusof.exceptions.AddingTransactionCategoryException;
 import ru.yusof.exceptions.CreatingTransactionCategoryException;
-import ru.yusof.exceptions.CustomException;
+import ru.yusof.exceptions.DaoException;
 import ru.yusof.exceptions.DeletionTransactionCategoryException;
 
 import javax.sql.DataSource;
@@ -13,6 +14,7 @@ import java.sql.SQLException;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
+@Service
 public class TransactionCategoryDao {
     private final DataSource dataSource;
 
@@ -42,7 +44,7 @@ public class TransactionCategoryDao {
                 throw new CreatingTransactionCategoryException("Creating transaction type failed, no ID obtained.");
             }
         } catch (SQLException e) {
-            throw new CustomException("Error occurred during transaction type creation", e);
+            throw new DaoException("Error occurred during transaction type creation", e);
         }
     }
 
@@ -58,7 +60,7 @@ public class TransactionCategoryDao {
             }
             return true;
         } catch (SQLException e) {
-            throw new CustomException("Error occurred while deleting transaction type", e);
+            throw new DaoException("Error occurred while deleting transaction type", e);
         }
     }
 
@@ -75,7 +77,7 @@ public class TransactionCategoryDao {
             }
             return true;
         } catch (SQLException e) {
-            throw new CustomException("Error occurred during transaction type editing", e);
+            throw new DaoException("Error occurred during transaction type editing", e);
         }
     }
 }

@@ -1,5 +1,6 @@
 package ru.yusof.service;
 
+import org.springframework.stereotype.Service;
 import ru.yusof.converter.Converter;
 import ru.yusof.dao.AccountDao;
 import ru.yusof.dao.AccountModel;
@@ -8,6 +9,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class AccountService {
     private final AccountDao accountDao;
     private final Converter<AccountModel, AccountDTO> accountDtoConverter;

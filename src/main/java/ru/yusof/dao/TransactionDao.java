@@ -1,5 +1,6 @@
 package ru.yusof.dao;
 
+import org.springframework.stereotype.Service;
 import ru.yusof.exceptions.*;
 
 import javax.sql.DataSource;
@@ -14,6 +15,7 @@ import java.util.List;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
+@Service
 public class TransactionDao {
     private final DataSource dataSource;
 
@@ -52,7 +54,7 @@ public class TransactionDao {
             }
             return categoryAmountModels;
         } catch (SQLException e) {
-            throw new RuntimeException("Database error during expense data fetch", e);
+            throw new DaoException("Database error during expense data fetch", e);
         }
     }
 
@@ -87,19 +89,19 @@ public class TransactionDao {
             }
             return categoryAmountModels;
         } catch (SQLException e) {
-            throw new RuntimeException("Database error during income data fetch", e);
+            throw new DaoException("Database error during income data fetch", e);
         }
     }
 
-    public void addTransaction(int senderAccountId, int receiverAccountId, BigDecimal amount, List<Integer> categoryIds) {
+    public void addTransaction(int senderAccountId, int receiverAccountId, int clientId, BigDecimal amount, List<Integer> categoryIds) {
         Connection connection = null;
         try {
             connection = dataSource.getConnection();
             connection.setAutoCommit(false);
 
-            isSenderHasSufficientBalance(senderAccountId, amount, connection);
+            isSenderHasSufficientBalance(senderAccountId, clientId, amount, connection);
 
-            subtractMoneyFromSender(senderAccountId, amount, connection);
+            subtractMoneyFromSender(senderAccountId, clientId, amount, connection);
 
             addMoneyToReceiver(receiverAccountId, amount, connection);
 
@@ -112,7 +114,7 @@ public class TransactionDao {
                 try {
                     connection.rollback();
                 } catch (SQLException rollbackException) {
-                    throw new CustomException("Failed to rollback transaction.", rollbackException);
+                    throw new DaoException("Failed to rollback transaction.", rollbackException);
                 }
             }
             throw new CustomException("Error occurred during transaction.", e);
@@ -122,88 +124,115 @@ public class TransactionDao {
                     connection.setAutoCommit(true);
                     connection.close();
                 } catch (SQLException closeException) {
-                    throw new CustomException("Failed to close connection.", closeException);
+                    throw new DaoException("Failed to close connection.", closeException);
                 }
             }
         }
     }
 
-    private static void insertCategoriesIntoTransactionToCategoryTable(List<Integer> categoryIds, PreparedStatement insertTransactionStatement, Connection connection) throws SQLException {
+    private static void insertCategoriesIntoTransactionToCategoryTable(List<Integer> categoryIds, PreparedStatement insertTransactionStatement, Connection connection) {
         int transactionId = getGeneratedTransactionId(insertTransactionStatement);
+        try {
+            for (int categoryId : categoryIds) {
+                PreparedStatement insertCategoryStatement = connection.prepareStatement(
+                        "insert into transaction_to_category (transaction_id, category_id) values (?,?)"
+                );
+                insertCategoryStatement.setInt(1, transactionId);
+                insertCategoryStatement.setInt(2, categoryId);
+                insertCategoryStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DaoException("Error occurred while inserting data to TransactionToCategoryTable", e);
+        }
+    }
 
-        for (int categoryId : categoryIds) {
-            PreparedStatement insertCategoryStatement = connection.prepareStatement(
-                    "insert into transaction_to_category (transaction_id, category_id) values (?,?)"
+    private static PreparedStatement getInsertTransactionStatement(int senderAccountId, int receiverAccountId, BigDecimal amount, Connection connection) {
+        int affectedRows;
+        try {
+            PreparedStatement insertTransactionStatement = connection.prepareStatement(
+                    "insert into transaction (created_date, amount, sender_account_id, receiver_account_id) values (CURRENT_TIMESTAMP, ?, ?, ?)",
+                    RETURN_GENERATED_KEYS
             );
-            insertCategoryStatement.setInt(1, transactionId);
-            insertCategoryStatement.setInt(2, categoryId);
-            insertCategoryStatement.executeUpdate();
+            insertTransactionStatement.setBigDecimal(1, amount);
+            insertTransactionStatement.setInt(2, senderAccountId);
+            insertTransactionStatement.setInt(3, receiverAccountId);
+            affectedRows = insertTransactionStatement.executeUpdate();
+            if (affectedRows != 1) {
+                throw new DaoException("Failed to insert transaction record.");
+            }
+            return insertTransactionStatement;
+        } catch (SQLException e) {
+            throw new DaoException("Error occurred while inserting transaction", e);
         }
     }
 
-    private static PreparedStatement getInsertTransactionStatement(int senderAccountId, int receiverAccountId, BigDecimal amount, Connection connection) throws SQLException {
-        int affectedRows;
-
-        PreparedStatement insertTransactionStatement = connection.prepareStatement(
-                "insert into transaction (created_date, amount, sender_account_id, receiver_account_id) values (CURRENT_TIMESTAMP, ?, ?, ?)",
-                RETURN_GENERATED_KEYS
-        );
-        insertTransactionStatement.setBigDecimal(1, amount);
-        insertTransactionStatement.setInt(2, senderAccountId);
-        insertTransactionStatement.setInt(3, receiverAccountId);
-        affectedRows = insertTransactionStatement.executeUpdate();
-        if (affectedRows != 1) {
-            throw new SQLException("Failed to insert transaction record.");
-        }
-        return insertTransactionStatement;
-    }
-
-    private static int getGeneratedTransactionId(PreparedStatement insertTransactionStatement) throws SQLException {
-        ResultSet generatedKey = insertTransactionStatement.getGeneratedKeys();
-        int transactionId;
-        if (generatedKey.next()) {
-            transactionId = generatedKey.getInt(1);
-        } else {
-            throw new SQLException("Failed to obtain transaction ID.");
-        }
-        return transactionId;
-    }
-
-    private void addMoneyToReceiver(int receiverAccountId, BigDecimal amount, Connection connection) throws SQLException {
-        int affectedRows;
-
-        PreparedStatement addToReceiverBalanceStatement = connection.prepareStatement(
-                "update account set balance = balance + ? where id = ?"
-        );
-        addToReceiverBalanceStatement.setBigDecimal(1, amount);
-        addToReceiverBalanceStatement.setInt(2, receiverAccountId);
-        affectedRows = addToReceiverBalanceStatement.executeUpdate();
-        if (affectedRows != 1) {
-            throw new AddingTheAmountException("Failed to update receiver's account balance.");
+    private static int getGeneratedTransactionId(PreparedStatement insertTransactionStatement) {
+        try {
+            ResultSet generatedKey = insertTransactionStatement.getGeneratedKeys();
+            int transactionId;
+            if (generatedKey.next()) {
+                transactionId = generatedKey.getInt(1);
+            } else {
+                throw new DaoException("Failed to obtain transaction ID.");
+            }
+            return transactionId;
+        } catch (SQLException e) {
+            throw new DaoException("Error occurred while retrieving transaction ID", e);
         }
     }
 
-    private void subtractMoneyFromSender(int senderAccountId, BigDecimal amount, Connection connection) throws SQLException {
-        PreparedStatement subtractFromSenderBalanceStatement = connection.prepareStatement(
-                "update account set balance = balance - ? where id = ?"
-        );
-        subtractFromSenderBalanceStatement.setBigDecimal(1, amount);
-        subtractFromSenderBalanceStatement.setInt(2, senderAccountId);
-
-        int affectedRows = subtractFromSenderBalanceStatement.executeUpdate();
-        if (affectedRows != 1) {
-            throw new SubtractingTheAmountException("Failed to update sender's account balance.");
+    private void addMoneyToReceiver(int receiverAccountId, BigDecimal amount, Connection connection) {
+        try {
+            PreparedStatement addToReceiverBalanceStatement = connection.prepareStatement(
+                    "update account set balance = balance + ? where id = ?"
+            );
+            addToReceiverBalanceStatement.setBigDecimal(1, amount);
+            addToReceiverBalanceStatement.setInt(2, receiverAccountId);
+            int affectedRows = addToReceiverBalanceStatement.executeUpdate();
+            if (affectedRows != 1) {
+                throw new AddingTheAmountException("Failed to update receiver's account balance.");
+            }
+        } catch (SQLException e) {
+            throw new DaoException("Error occurred while adding money to receiver's account", e);
         }
     }
 
-    private void isSenderHasSufficientBalance(int senderAccountId, BigDecimal amount, Connection connection) throws SQLException {
-        PreparedStatement checkBalanceStatement = connection.prepareStatement(
-                "select balance from account where id = ?"
-        );
-        checkBalanceStatement.setInt(1, senderAccountId);
-        ResultSet balanceResultSet = checkBalanceStatement.executeQuery();
-        if (!balanceResultSet.next() || balanceResultSet.getBigDecimal("balance").compareTo(amount) < 0) {
-            throw new InsufficientFundsException("Insufficient funds in sender's account.");
+    private void subtractMoneyFromSender(int senderAccountId, int clientId, BigDecimal amount, Connection connection) {
+        try {
+            PreparedStatement subtractFromSenderBalanceStatement = connection.prepareStatement(
+                    "update account set balance = balance - ?  where id = ? and client_id = ?"
+            );
+            subtractFromSenderBalanceStatement.setBigDecimal(1, amount);
+            subtractFromSenderBalanceStatement.setInt(2, senderAccountId);
+            subtractFromSenderBalanceStatement.setInt(3, clientId);
+
+            int affectedRows = subtractFromSenderBalanceStatement.executeUpdate();
+            if (affectedRows != 1) {
+                throw new SubtractingTheAmountException("Failed to update sender's account balance.");
+            }
+        } catch (SQLException e) {
+            throw new DaoException("Error occurred while updating sender's account balance", e);
+        }
+    }
+
+    private void isSenderHasSufficientBalance(int senderAccountId, int clientId, BigDecimal amount, Connection connection) {
+        try {
+            PreparedStatement checkBalanceStatement = connection.prepareStatement(
+                    "select balance from account where id = ? and client_id = ?"
+            );
+            checkBalanceStatement.setInt(1, senderAccountId);
+            checkBalanceStatement.setInt(2, clientId);
+            ResultSet balanceResultSet = checkBalanceStatement.executeQuery();
+
+            if (!balanceResultSet.next()) {
+                throw new IllegalOwnerException("Account does not belong to the user.");
+            }
+
+            if (balanceResultSet.getBigDecimal("balance").compareTo(amount) < 0) {
+                throw new InsufficientFundsException("Insufficient funds in sender's account.");
+            }
+        } catch (SQLException e) {
+            throw new DaoException("Error occurred while checking sender's account balance", e);
         }
     }
 }

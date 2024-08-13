@@ -1,7 +1,8 @@
 package ru.yusof.dao;
 
+import org.springframework.stereotype.Service;
 import ru.yusof.exceptions.AlreadyExistsException;
-import ru.yusof.exceptions.CustomException;
+import ru.yusof.exceptions.DaoException;
 import ru.yusof.exceptions.RegistrationOfANewUserException;
 
 import javax.sql.DataSource;
@@ -10,6 +11,7 @@ import java.util.Optional;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
+@Service
 public class UserDao {
     private final DataSource dataSource;
 
@@ -36,7 +38,7 @@ public class UserDao {
             }
             return Optional.ofNullable(userModel);
         } catch (SQLException e) {
-            throw new CustomException(e);
+            throw new DaoException("Error occurred during finding by email and hash", e);
         }
     }
 
@@ -61,7 +63,7 @@ public class UserDao {
         } catch (SQLIntegrityConstraintViolationException e) {
             throw new AlreadyExistsException("User with the given email already exists.");
         } catch (SQLException e) {
-            throw new CustomException(e);
+            throw new DaoException("Error occurred during inserting new user", e);
         }
     }
 }

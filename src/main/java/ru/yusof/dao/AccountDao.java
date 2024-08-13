@@ -1,7 +1,8 @@
 package ru.yusof.dao;
 
+import org.springframework.stereotype.Service;
 import ru.yusof.exceptions.CreatingAccountException;
-import ru.yusof.exceptions.CustomException;
+import ru.yusof.exceptions.DaoException;
 import ru.yusof.exceptions.DeletionAccountException;
 
 import javax.sql.DataSource;
@@ -16,6 +17,7 @@ import java.util.NoSuchElementException;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
+@Service
 public class AccountDao {
     private final DataSource dataSource;
 
@@ -46,7 +48,7 @@ public class AccountDao {
             }
             return accountModels;
         } catch (SQLException e) {
-            throw new RuntimeException("Database error occurred while fetching accounts by client ID.", e);
+            throw new DaoException("Database error occurred while fetching accounts by client ID.", e);
         }
     }
 
@@ -72,7 +74,7 @@ public class AccountDao {
                 throw new CreatingAccountException("Something went wrong during creating account. Please, try again later");
             }
         } catch (SQLException e) {
-            throw new CustomException("Error occurred during account creation", e);
+            throw new DaoException("Error occurred during account creation", e);
         }
     }
 
@@ -87,7 +89,7 @@ public class AccountDao {
                 throw new DeletionAccountException("No account found with ID: " + accountId + " for client ID: " + clientId);
             }
         } catch (SQLException e) {
-            throw new CustomException("Error occurred while deleting account", e);
+            throw new DaoException("Error occurred while deleting account", e);
         }
     }
 }
