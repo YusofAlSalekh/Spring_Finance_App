@@ -2,8 +2,12 @@ package ru.yusof.service;
 
 import org.springframework.stereotype.Service;
 import ru.yusof.converter.Converter;
+import ru.yusof.dao.AccountModel;
 import ru.yusof.dao.TransactionCategoryDao;
 import ru.yusof.dao.TransactionCategoryModel;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class TransactionCategoryService {
@@ -26,5 +30,15 @@ public class TransactionCategoryService {
 
     public boolean editTransactionCategory(String newName, int transactionCategoryId, int clientId) {
         return transactionCategoryDao.editTransactionCategory(newName, transactionCategoryId, clientId);
+    }
+
+    public List<TransactionCategoryDTO> viewTransactionCategory(int clientId) {
+        List<TransactionCategoryModel> accountModels = transactionCategoryDao.findByClientID(clientId);
+        List<TransactionCategoryDTO> transactionCategoryDTOs = new ArrayList<>();
+
+        for (TransactionCategoryModel transactionCategoryModel : accountModels) {
+            transactionCategoryDTOs.add(transactionCategoryDTOConverter.convert(transactionCategoryModel));
+        }
+        return transactionCategoryDTOs;
     }
 }

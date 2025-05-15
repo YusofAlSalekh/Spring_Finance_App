@@ -92,4 +92,27 @@ public class AccountDao {
             throw new DaoException("Error occurred while deleting account", e);
         }
     }
+
+    public AccountModel updateAccountName(String accountName, int accountId, int clientId) {
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement("update account set name = ? where id = ? and client_id = ?");
+            preparedStatement.setString(1, accountName);
+            preparedStatement.setInt(2, accountId);
+            preparedStatement.setInt(3, clientId);
+            int resultSet = preparedStatement.executeUpdate();
+
+            if (resultSet == 1) {
+                AccountModel accountModel = new AccountModel();
+                accountModel.setId(accountId);
+                accountModel.setName(accountName);
+                accountModel.setClient_id(clientId);
+                return accountModel;
+            } else {
+                throw new CreatingAccountException("Something went wrong during updating account name. Please, try again later");
+            }
+        } catch (SQLException e) {
+            throw new DaoException("Error occurred during updating account name", e);
+        }
+    }
 }

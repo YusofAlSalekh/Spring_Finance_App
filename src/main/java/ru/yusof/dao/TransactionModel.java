@@ -11,6 +11,9 @@ public class TransactionModel {
     private int senderAccountId;
     private int receiverAccountId;
 
+    public TransactionModel() {
+    }
+
     public TransactionModel(int id, Timestamp createdDate, BigDecimal amount, int senderAccountId, int receiverAccountId) {
         this.id = id;
         this.createdDate = createdDate;

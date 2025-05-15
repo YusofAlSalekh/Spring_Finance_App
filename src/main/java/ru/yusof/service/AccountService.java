@@ -37,4 +37,9 @@ public class AccountService {
     public void deleteAccount(int accountId, int clientId) {
         accountDao.deleteAccount(accountId, clientId);
     }
+
+    public AccountDTO updateAccountName(String accountName, int accountId, int clientId) {
+        AccountModel accountModel = accountDao.updateAccountName(accountName, accountId, clientId);
+        return accountDtoConverter.convert(accountModel);
+    }
 }

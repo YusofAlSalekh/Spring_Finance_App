@@ -28,4 +28,13 @@ public class TransactionCategoryDTO {
     public void setClient_id(int client_id) {
         this.client_id = client_id;
     }
+
+    @Override
+    public String toString() {
+        return "TransactionCategoryDTO{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", client_id=" + client_id +
+                '}';
+    }
 }

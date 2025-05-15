@@ -49,4 +49,15 @@ public class TransactionDTO {
     public void setReceiverAccountId(int receiverAccountId) {
         this.receiverAccountId = receiverAccountId;
     }
+
+    @Override
+    public String toString() {
+        return "TransactionDTO{" +
+                "id=" + id +
+                ", createdDate=" + createdDate +
+                ", amount=" + amount +
+                ", senderAccountId=" + senderAccountId +
+                ", receiverAccountId=" + receiverAccountId +
+                '}';
+    }
 }

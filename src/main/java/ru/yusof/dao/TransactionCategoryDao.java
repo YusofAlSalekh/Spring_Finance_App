@@ -11,6 +11,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
@@ -78,6 +81,32 @@ public class TransactionCategoryDao {
             return true;
         } catch (SQLException e) {
             throw new DaoException("Error occurred during transaction type editing", e);
+        }
+    }
+
+    public List<TransactionCategoryModel> findByClientID(int clientId) {
+        List<TransactionCategoryModel> transactionCategoryModels = new ArrayList<>();
+
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement("select * from category where client_id = ?");
+            preparedStatement.setInt(1, clientId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            boolean found = false;
+            while (resultSet.next()) {
+                found = true;
+                TransactionCategoryModel transactionCategoryModel = new TransactionCategoryModel();
+                transactionCategoryModel.setId(resultSet.getInt("id"));
+                transactionCategoryModel.setName(resultSet.getString("name"));
+                transactionCategoryModel.setClientId(resultSet.getInt("client_id"));
+                transactionCategoryModels.add(transactionCategoryModel);
+            }
+            if (!found) {
+                throw new NoSuchElementException("No category found for client ID: " + clientId);
+            }
+            return transactionCategoryModels;
+        } catch (SQLException e) {
+            throw new DaoException("Database error occurred while fetching category by client ID.", e);
         }
     }
 }

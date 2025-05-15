@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
@@ -233,6 +234,37 @@ public class TransactionDao {
             }
         } catch (SQLException e) {
             throw new DaoException("Error occurred while checking sender's account balance", e);
+        }
+    }
+
+    public List<TransactionModel> findTransByClientID(int clientId) {
+        List<TransactionModel> transactionModels = new ArrayList<>();
+
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "select * from transaction t " +
+                            "join account a on  t.sender_account_id = a.id or t.receiver_account_id = a.id " +
+                            "where a.client_id = ?");
+            preparedStatement.setInt(1, clientId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            boolean found = false;
+            while (resultSet.next()) {
+                found = true;
+                TransactionModel transactionModel = new TransactionModel();
+                transactionModel.setId(resultSet.getInt("id"));
+                transactionModel.setCreatedDate(resultSet.getTimestamp("created_date"));
+                transactionModel.setAmount(resultSet.getBigDecimal("amount"));
+                transactionModel.setSenderAccountId(resultSet.getInt("sender_account_id"));
+                transactionModel.setReceiverAccountId(resultSet.getInt("receiver_account_id"));
+                transactionModels.add(transactionModel);
+            }
+            if (!found) {
+                throw new NoSuchElementException("No transaction found for client ID: " + clientId);
+            }
+            return transactionModels;
+        } catch (SQLException e) {
+            throw new DaoException("Database error occurred while fetching transactions by client ID.", e);
         }
     }
 }
