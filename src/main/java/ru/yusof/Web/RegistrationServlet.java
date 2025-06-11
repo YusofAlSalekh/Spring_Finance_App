@@ -1,5 +1,6 @@
 package ru.yusof.Web;
 
+import ru.yusof.exceptions.AlreadyExistsException;
 import ru.yusof.service.AuthorizationService;
 import ru.yusof.service.UserDTO;
 import ru.yusof.view.SpringContext;
@@ -23,13 +24,19 @@ public class RegistrationServlet extends HttpServlet {
         Writer writer = resp.getWriter();
         String login = req.getParameter("login");
         String password = req.getParameter("password");
-        UserDTO user = authService.register(login, password);
+        if (login == null || password == null || login.isBlank() || password.isBlank()) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Login and password must be provided");
+            return;
+        }
 
-        if (user == null) {
-            writer.write("Problem during registration");
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        } else {
+        try {
+            UserDTO user = authService.register(login, password);
             writer.write(user.toString());
+            resp.setStatus(HttpServletResponse.SC_OK);
+        } catch (AlreadyExistsException e) {
+            resp.sendError(HttpServletResponse.SC_CONFLICT, "User already exists");
+        } catch (Exception e) {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected error during registration");
         }
     }
 }

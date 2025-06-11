@@ -4,15 +4,11 @@ import ru.yusof.service.AuthorizationService;
 import ru.yusof.service.UserDTO;
 import ru.yusof.view.SpringContext;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
 import java.io.PrintWriter;
 
-public class UserServlet extends HttpServlet {
+public class UserServlet extends BaseServlet {
     private final AuthorizationService authService;
 
     public UserServlet() {
@@ -20,17 +16,9 @@ public class UserServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGetInternal(HttpServletRequest req, HttpServletResponse resp, Integer userId) throws Exception {
         PrintWriter writer = resp.getWriter();
-        HttpSession session = req.getSession();
-        Integer userId = (Integer) session.getAttribute("userId");
-
-        if (userId == null) {
-            writer.write("Access denied");
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        } else {
-            UserDTO user = authService.getUserById(userId);
-            writer.write(user.toString());
-        }
+        UserDTO user = authService.getUserById(userId);
+        writer.write(user.toString());
     }
 }

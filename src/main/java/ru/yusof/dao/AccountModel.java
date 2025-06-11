@@ -7,7 +7,7 @@ public class AccountModel {
     private int id;
     private String name;
     private BigDecimal balance;
-    private int client_id;
+    private int clientId;
 
     public int getId() {
         return id;
@@ -33,12 +33,12 @@ public class AccountModel {
         this.balance = balance;
     }
 
-    public int getClient_id() {
-        return client_id;
+    public int getClientId() {
+        return clientId;
     }
 
-    public void setClient_id(int client_id) {
-        this.client_id = client_id;
+    public void setClientId(int clientId) {
+        this.clientId = clientId;
     }
 
     @Override

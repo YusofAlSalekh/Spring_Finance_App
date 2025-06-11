@@ -92,17 +92,12 @@ public class TransactionCategoryDao {
             preparedStatement.setInt(1, clientId);
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            boolean found = false;
             while (resultSet.next()) {
-                found = true;
                 TransactionCategoryModel transactionCategoryModel = new TransactionCategoryModel();
                 transactionCategoryModel.setId(resultSet.getInt("id"));
                 transactionCategoryModel.setName(resultSet.getString("name"));
                 transactionCategoryModel.setClientId(resultSet.getInt("client_id"));
                 transactionCategoryModels.add(transactionCategoryModel);
-            }
-            if (!found) {
-                throw new NoSuchElementException("No category found for client ID: " + clientId);
             }
             return transactionCategoryModels;
         } catch (SQLException e) {

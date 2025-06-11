@@ -4,34 +4,37 @@ import ru.yusof.service.AccountDTO;
 import ru.yusof.service.AccountService;
 import ru.yusof.view.SpringContext;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
 import java.io.PrintWriter;
 
-public class AccountUpdatingNameServlet extends HttpServlet {
+public class AccountUpdatingNameServlet extends BaseServlet {
     private final AccountService accountService;
 
     public AccountUpdatingNameServlet() {
         this.accountService = SpringContext.getContext().getBean(AccountService.class);
     }
 
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    @Override
+    protected void doGetInternal(HttpServletRequest req, HttpServletResponse resp, Integer userId) throws Exception {
         PrintWriter writer = resp.getWriter();
-        HttpSession session = req.getSession();
-        Integer userId = (Integer) session.getAttribute("userId");
         String accountName = req.getParameter("accountName");
-        int accountId = Integer.parseInt(req.getParameter("accountId"));
+        String accountIdParam = req.getParameter("accountId");
 
-        if (userId == null) {
-            writer.write("Access denied");
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        } else {
-            AccountDTO updatedAccountName = accountService.updateAccountName(accountName, accountId, userId);
-            writer.write(updatedAccountName.toString());
+        if (accountName == null || accountIdParam == null) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Both accountName and accountId are required");
+            return;
         }
+
+        int accountId;
+        try {
+            accountId = Integer.parseInt(req.getParameter("accountId"));
+        } catch (NumberFormatException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "accountId should be a valid number");
+            return;
+        }
+        AccountDTO updatedAccountName = accountService.updateAccountName(accountName, accountId, userId);
+        resp.setStatus(HttpServletResponse.SC_OK);
+        writer.write(updatedAccountName.toString());
     }
 }

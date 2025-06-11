@@ -34,7 +34,7 @@ class AccountDaoTest {
         List<AccountModel> accountModels = subj.findByClientID(1);
         assertFalse(accountModels.isEmpty(), "Should find at least one account");
         assertEquals("yusof", accountModels.get(0).getName());
-        assertEquals(1, accountModels.get(0).getClient_id());
+        assertEquals(1, accountModels.get(0).getClientId());
         assertEquals(new BigDecimal("100"), accountModels.get(0).getBalance());
     }
 
@@ -52,7 +52,7 @@ class AccountDaoTest {
         assertNotNull(createdAccount);
         assertEquals("yusof", createdAccount.getName());
         assertEquals(new BigDecimal("100.00"), createdAccount.getBalance());
-        assertEquals(1, createdAccount.getClient_id());
+        assertEquals(1, createdAccount.getClientId());
     }
 
     @Test

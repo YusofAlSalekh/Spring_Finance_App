@@ -5,7 +5,7 @@
          version="3.1">
     <servlet>
         <servlet-name>AuthServlet</servlet-name>
-        <servlet-class>ru.yusof.Web.AuthServlet</servlet-class>
+        <servlet-class>ru.yusof.Web.AuthorisationServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>AuthServlet</servlet-name>
@@ -33,7 +33,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>AccountCreationServlet</servlet-name>
-        <url-pattern>/create</url-pattern>
+        <url-pattern>/account/create</url-pattern>
     </servlet-mapping>
     <servlet>
         <servlet-name>AccountsViewingServlet</servlet-name>
@@ -41,7 +41,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>AccountsViewingServlet</servlet-name>
-        <url-pattern>/view</url-pattern>
+        <url-pattern>/account/show</url-pattern>
     </servlet-mapping>
     <servlet>
         <servlet-name>AccountDeletionServlet</servlet-name>
@@ -49,7 +49,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>AccountDeletionServlet</servlet-name>
-        <url-pattern>/delete</url-pattern>
+        <url-pattern>/account/delete</url-pattern>
     </servlet-mapping>
     <servlet>
         <servlet-name>AccountUpdatingNameServlet</servlet-name>
@@ -57,47 +57,47 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>AccountUpdatingNameServlet</servlet-name>
-        <url-pattern>/updateName</url-pattern>
+        <url-pattern>/account/update</url-pattern>
     </servlet-mapping>
     <servlet>
-        <servlet-name>TransCatCreationServlet</servlet-name>
-        <servlet-class>ru.yusof.Web.TransCatCreationServlet</servlet-class>
+        <servlet-name>TransactionCategoryCreationServlet</servlet-name>
+        <servlet-class>ru.yusof.Web.TransactionCategoryCreationServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>TransCatCreationServlet</servlet-name>
-        <url-pattern>/createTransCat</url-pattern>
+        <servlet-name>TransactionCategoryCreationServlet</servlet-name>
+        <url-pattern>/category/create</url-pattern>
     </servlet-mapping>
     <servlet>
-        <servlet-name>TransCatDeletionServlet</servlet-name>
-        <servlet-class>ru.yusof.Web.TransCatDeletionServlet</servlet-class>
+        <servlet-name>TransactionCategoryDeletionServlet</servlet-name>
+        <servlet-class>ru.yusof.Web.TransactionCategoryDeletionServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>TransCatDeletionServlet</servlet-name>
-        <url-pattern>/deleteTransCat</url-pattern>
+        <servlet-name>TransactionCategoryDeletionServlet</servlet-name>
+        <url-pattern>/category/delete</url-pattern>
     </servlet-mapping>
     <servlet>
-        <servlet-name>TransCatUpdatingServlet</servlet-name>
-        <servlet-class>ru.yusof.Web.TransCatUpdatingServlet</servlet-class>
+        <servlet-name>TransactionCategoryUpdatingServlet</servlet-name>
+        <servlet-class>ru.yusof.Web.TransactionCategoryUpdatingServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>TransCatUpdatingServlet</servlet-name>
-        <url-pattern>/updateTransCat</url-pattern>
+        <servlet-name>TransactionCategoryUpdatingServlet</servlet-name>
+        <url-pattern>/category/update</url-pattern>
     </servlet-mapping>
     <servlet>
-        <servlet-name>TransCatViewingServlet</servlet-name>
-        <servlet-class>ru.yusof.Web.TransCatViewingServlet</servlet-class>
+        <servlet-name>TransactionCategoryViewingServlet</servlet-name>
+        <servlet-class>ru.yusof.Web.TransactionCategoryViewingServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>TransCatViewingServlet</servlet-name>
-        <url-pattern>/viewTransCat</url-pattern>
+        <servlet-name>TransactionCategoryViewingServlet</servlet-name>
+        <url-pattern>/category/show</url-pattern>
     </servlet-mapping>
     <servlet>
-        <servlet-name>TransViewingServlet</servlet-name>
-        <servlet-class>ru.yusof.Web.TransViewingServlet</servlet-class>
+        <servlet-name>CreateTransactionServlet</servlet-name>
+        <servlet-class>ru.yusof.Web.CreateTransactionServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>TransViewingServlet</servlet-name>
-        <url-pattern>/showTrans</url-pattern>
+        <servlet-name>CreateTransactionServlet</servlet-name>
+        <url-pattern>/transaction/create</url-pattern>
     </servlet-mapping>
     <servlet>
         <servlet-name>IncomeReportServlet</servlet-name>
@@ -105,7 +105,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>IncomeReportServlet</servlet-name>
-        <url-pattern>/income</url-pattern>
+        <url-pattern>/transaction/income</url-pattern>
     </servlet-mapping>
     <servlet>
         <servlet-name>ExpenseReportServlet</servlet-name>
@@ -113,6 +113,6 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>ExpenseReportServlet</servlet-name>
-        <url-pattern>/expense</url-pattern>
+        <url-pattern>/transaction/expense</url-pattern>
     </servlet-mapping>
 </web-app>

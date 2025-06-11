@@ -4,16 +4,12 @@ import ru.yusof.service.AccountDTO;
 import ru.yusof.service.AccountService;
 import ru.yusof.view.SpringContext;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
 
-public class AccountCreationServlet extends HttpServlet {
+public class AccountCreationServlet extends BaseServlet {
     private final AccountService accountService;
 
     public AccountCreationServlet() {
@@ -21,19 +17,25 @@ public class AccountCreationServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGetInternal(HttpServletRequest req, HttpServletResponse resp, Integer userId) throws Exception {
         PrintWriter writer = resp.getWriter();
-        HttpSession session = req.getSession();
-        Integer userId = (Integer) session.getAttribute("userId");
-        String accountName = req.getParameter("accountName");
-        BigDecimal balance = new BigDecimal(req.getParameter("balance"));
+        String accountName = req.getParameter("name");
+        String balanceParam = req.getParameter("balance");
 
-        if (userId == null) {
-            writer.write("Access denied");
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        } else {
-            AccountDTO account = accountService.createAccount(accountName, balance, userId);
-            writer.write(account.toString());
+        if (accountName == null || accountName.isBlank()) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Account name is required");
+            return;
         }
+
+        BigDecimal balance;
+        try {
+            balance = new BigDecimal(balanceParam);
+        } catch (NumberFormatException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid balance value");
+            return;
+        }
+        AccountDTO account = accountService.createAccount(accountName, balance, userId);
+        resp.setStatus(HttpServletResponse.SC_OK);
+        writer.write(account.toString());
     }
 }

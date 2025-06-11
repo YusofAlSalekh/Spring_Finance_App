@@ -36,13 +36,13 @@ class AccountServiceTest {
         accountModel.setId(1);
         accountModel.setBalance(new BigDecimal("100.00"));
         accountModel.setName("yusof");
-        accountModel.setClient_id(1);
+        accountModel.setClientId(1);
         List<AccountModel> accountModels = Arrays.asList(accountModel);
         when(accountDao.findByClientID(1)).thenReturn(accountModels);
 
         AccountDTO accountDTO = new AccountDTO();
         accountDTO.setBalance(new BigDecimal("100.00"));
-        accountDTO.setClient_id(1);
+        accountDTO.setClientId(1);
         accountDTO.setId(1);
         accountDTO.setName("yusof");
         when(accountDtoConverter.convert(accountModel)).thenReturn(accountDTO);
@@ -72,14 +72,14 @@ class AccountServiceTest {
         accountModel.setId(10);
         accountModel.setBalance(new BigDecimal("100.00"));
         accountModel.setName("yusoff");
-        accountModel.setClient_id(10);
+        accountModel.setClientId(10);
         when(accountDao.createAccount("yusoff", new BigDecimal("100.00"), 10)).thenReturn(accountModel);
 
         AccountDTO accountDTO = new AccountDTO();
         accountDTO.setId(10);
         accountDTO.setBalance(new BigDecimal("100.00"));
         accountDTO.setName("yusoff");
-        accountDTO.setClient_id(10);
+        accountDTO.setClientId(10);
         when(accountDtoConverter.convert(accountModel)).thenReturn(accountDTO);
 
         AccountDTO account = subj.createAccount("yusoff", new BigDecimal("100.00"), 10);
