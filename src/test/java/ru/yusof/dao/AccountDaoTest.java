@@ -8,7 +8,6 @@ import ru.yusof.exceptions.DeletionAccountException;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,9 +39,9 @@ class AccountDaoTest {
 
     @Test
     void findByClientID_accountDoesNotExists() {
-        assertThrows(NoSuchElementException.class, () -> {
-            subj.findByClientID(2);
-        }, "No accounts found for client ID");
+        List<AccountModel> result = subj.findByClientID(2);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -60,9 +59,9 @@ class AccountDaoTest {
         subj.createAccount("ganik", new BigDecimal("100.00"), 1);
         subj.deleteAccount(1, 1);
 
-        assertThrows(NoSuchElementException.class, () -> {
-            subj.findByClientID(1);
-        }, "No accounts found for client ID");
+        List<AccountModel> result = subj.findByClientID(1);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
