@@ -15,15 +15,8 @@ public class TransactionCategoryDeletionServlet extends BaseServlet {
 
     @Override
     protected void doGetInternal(HttpServletRequest req, HttpServletResponse resp, Integer userId) throws Exception {
-        String idParam = req.getParameter("id");
+        int transactionCategoryId = extractPositiveInteger(req, "id");
 
-        int transactionCategoryId;
-        try {
-            transactionCategoryId = Integer.parseInt(idParam);
-        } catch (NumberFormatException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "id should be a valid number");
-            return;
-        }
         transactionCategoryService.deleteTransactionCategory(transactionCategoryId, userId);
         resp.setStatus(HttpServletResponse.SC_OK);
     }

@@ -15,13 +15,7 @@ public class AccountDeletionServlet extends BaseServlet {
 
     @Override
     protected void doGetInternal(HttpServletRequest req, HttpServletResponse resp, Integer userId) throws Exception {
-        int accountId;
-        try {
-            accountId = Integer.parseInt(req.getParameter("accountId"));
-        } catch (NumberFormatException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "accountId should be a valid number");
-            return;
-        }
+        int accountId = extractPositiveInteger(req, "accountId");
         accountService.deleteAccount(accountId, userId);
         resp.setStatus(HttpServletResponse.SC_OK);
     }

@@ -1,10 +1,7 @@
 package ru.yusof.dao;
 
 import org.springframework.stereotype.Service;
-import ru.yusof.exceptions.AddingTransactionCategoryException;
-import ru.yusof.exceptions.CreatingTransactionCategoryException;
-import ru.yusof.exceptions.DaoException;
-import ru.yusof.exceptions.DeletionTransactionCategoryException;
+import ru.yusof.exceptions.*;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -13,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
@@ -33,7 +29,7 @@ public class TransactionCategoryDao {
             preparedStatement.setInt(2, clientId);
             int affectedRows = preparedStatement.executeUpdate();
             if (affectedRows == 0) {
-                throw new CreatingTransactionCategoryException("Creating transaction category failed, no rows affected.");
+                throw new OperationFailedException("Creating transaction category failed, no rows affected.");
             }
 
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
@@ -44,7 +40,7 @@ public class TransactionCategoryDao {
                 transactionCategoryModel.setClientId(clientId);
                 return transactionCategoryModel;
             } else {
-                throw new CreatingTransactionCategoryException("Creating transaction type failed, no ID obtained.");
+                throw new OperationFailedException("Creating transaction type failed, no ID obtained.");
             }
         } catch (SQLException e) {
             throw new DaoException("Error occurred during transaction type creation", e);
@@ -59,7 +55,7 @@ public class TransactionCategoryDao {
             preparedStatement.setInt(2, clientId);
             int affectedRows = preparedStatement.executeUpdate();
             if (affectedRows == 0) {
-                throw new DeletionTransactionCategoryException("No transaction type found with ID: " + transactionCategoryId);
+                throw new NotFoundException("No transaction type found with ID: " + transactionCategoryId);
             }
             return true;
         } catch (SQLException e) {
@@ -76,7 +72,7 @@ public class TransactionCategoryDao {
             preparedStatement.setInt(3, clientId);
             int affectedRows = preparedStatement.executeUpdate();
             if (affectedRows == 0) {
-                throw new AddingTransactionCategoryException("No transaction type found with ID: " + transactionCategoryId);
+                throw new OperationFailedException("No transaction type found with ID: " + transactionCategoryId);
             }
             return true;
         } catch (SQLException e) {

@@ -18,12 +18,8 @@ public class TransactionCategoryCreationServlet extends BaseServlet {
     @Override
     protected void doGetInternal(HttpServletRequest req, HttpServletResponse resp, Integer userId) throws Exception {
         PrintWriter writer = resp.getWriter();
-        String categoryName = req.getParameter("name");
+        String categoryName = extractNotBlankString(req, "name");
 
-        if (categoryName == null || categoryName.isBlank()) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Category name is required");
-            return;
-        }
         TransactionCategoryDTO transactionCategory = transactionCategoryService.createCategory(categoryName, userId);
         writer.write(transactionCategory.toString());
         resp.setStatus(HttpServletResponse.SC_OK);

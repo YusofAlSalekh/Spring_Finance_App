@@ -6,6 +6,7 @@ import ru.yusof.dao.UserDao;
 import ru.yusof.dao.UserModel;
 import ru.yusof.exceptions.BadCredentialsException;
 import ru.yusof.exceptions.DaoException;
+import ru.yusof.exceptions.NotFoundException;
 import ru.yusof.exceptions.UserNotFoundByIdException;
 
 @Service
@@ -22,7 +23,7 @@ public class AuthorizationService {
     }
 
     public UserDTO getUserById(Integer userId) {
-        UserModel user= userDao.findById(userId).orElseThrow(()->new UserNotFoundByIdException("User with such id not found"));
+        UserModel user = userDao.findById(userId).orElseThrow(() -> new NotFoundException("User with such id not found"));
         if (user == null) {
             return null;
         }

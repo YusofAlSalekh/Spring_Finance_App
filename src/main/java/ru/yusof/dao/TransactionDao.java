@@ -107,7 +107,7 @@ public class TransactionDao {
                     throw new DaoException("Failed to rollback transaction.", rollbackException);
                 }
             }
-            throw new AddTransactionException("Error occurred during transaction.", e);
+            throw new OperationFailedException("Error occurred during transaction.", e);
         } finally {
             if (connection != null) {
                 try {
@@ -215,11 +215,11 @@ public class TransactionDao {
             ResultSet balanceResultSet = checkBalanceStatement.executeQuery();
 
             if (!balanceResultSet.next()) {
-                throw new IllegalOwnerException("Account does not belong to the user.");
+                throw new ForbiddenException("Account does not belong to the user.");
             }
 
             if (balanceResultSet.getBigDecimal("balance").compareTo(amount) < 0) {
-                throw new InsufficientFundsException("Insufficient funds in sender's account.");
+                throw new IllegalArgumentException("Insufficient funds in sender's account.");
             }
         } catch (SQLException e) {
             throw new DaoException("Error occurred while checking sender's account balance", e);

@@ -20,13 +20,9 @@ public class ExpenseReportServlet extends BaseServlet {
     @Override
     protected void doGetInternal(HttpServletRequest req, HttpServletResponse resp, Integer userId) throws Exception {
         PrintWriter writer = resp.getWriter();
-
-        LocalDate[] range = parseDateRange(req, resp);
-        if (range == null) {
-            return;
-        }
-        LocalDate startDate = range[0];
-        LocalDate endDate = range[1];
+        DateRange range = parseDateRange(req, resp);
+        LocalDate startDate = range.getStartDate();
+        LocalDate endDate = range.getEndDate();
 
         List<CategoryAmountModel> transactions = transactionService.getExpenseReportByCategory(userId, startDate, endDate);
         resp.setStatus(HttpServletResponse.SC_OK);

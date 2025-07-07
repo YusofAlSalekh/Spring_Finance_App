@@ -1,10 +1,7 @@
 package ru.yusof.dao;
 
 import org.springframework.stereotype.Service;
-import ru.yusof.exceptions.AlreadyExistsException;
-import ru.yusof.exceptions.CreatingAccountException;
-import ru.yusof.exceptions.DaoException;
-import ru.yusof.exceptions.DeletionAccountException;
+import ru.yusof.exceptions.*;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
@@ -66,7 +63,7 @@ public class AccountDao {
                 accountModel.setClientId(clientId);
                 return accountModel;
             } else {
-                throw new CreatingAccountException("Something went wrong during creating account. Please, try again later");
+                throw new OperationFailedException("Something went wrong during creating account. Please, try again later");
             }
         } catch (SQLException e) {
             throw new DaoException("Error occurred during account creation", e);
@@ -81,7 +78,7 @@ public class AccountDao {
             preparedStatement.setInt(2, clientId);
             int affectedRows = preparedStatement.executeUpdate();
             if (affectedRows == 0) {
-                throw new DeletionAccountException("No account found with ID: " + accountId + " for client ID: " + clientId);
+                throw new NotFoundException("No account found with ID: " + accountId + " for client ID: " + clientId);
             }
         } catch (SQLException e) {
             throw new DaoException("Error occurred while deleting account", e);
@@ -115,7 +112,7 @@ public class AccountDao {
                 accountModel.setClientId(clientId);
                 return accountModel;
             } else {
-                throw new CreatingAccountException("Something went wrong during updating account name. Please, try again later");
+                throw new OperationFailedException("Something went wrong during updating account name. Please, try again later");
             }
         } catch (SQLException e) {
             throw new DaoException("Error occurred during updating account name", e);

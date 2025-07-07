@@ -7,8 +7,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 public abstract class BaseServlet extends HttpServlet {
@@ -30,15 +33,14 @@ public abstract class BaseServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
         } catch (AlreadyExistsException e) {
             resp.sendError(HttpServletResponse.SC_CONFLICT, e.getMessage());
-        } catch (NoSuchElementException | DeletionAccountException | UserNotFoundByIdException e) {
+        } catch (NotFoundException e) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-        } catch (CreatingAccountException | CreatingTransactionCategoryException |
-                 DeletionTransactionCategoryException | AddingTransactionCategoryException |
-                 AddTransactionException e) {
+        } catch (OperationFailedException e) {
             resp.sendError(HttpServletResponse.SC_EXPECTATION_FAILED, e.getMessage());
-        } catch (IllegalOwnerException | AddingTheAmountException | SubtractingTheAmountException |
-                 InsufficientFundsException e) {
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (IllegalArgumentException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+        } catch (ForbiddenException e) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Something went wrong");
@@ -47,14 +49,67 @@ public abstract class BaseServlet extends HttpServlet {
 
     protected abstract void doGetInternal(HttpServletRequest req, HttpServletResponse resp, Integer userId) throws Exception;
 
-    protected LocalDate[] parseDateRange(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected DateRange parseDateRange(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             LocalDate startDate = LocalDate.parse(req.getParameter("start"));
             LocalDate endDate = LocalDate.parse(req.getParameter("end"));
-            return new LocalDate[]{startDate, endDate};
+            return new DateRange(startDate, endDate);
         } catch (DateTimeParseException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid date format. Expected format is yyyy-MM-dd.");
-            return null;
+            throw new IllegalArgumentException("Invalid date format. Expected format is yyyy-MM-dd.");
+        }
+    }
+
+    protected BigDecimal extractPositiveBigDecimal(HttpServletRequest request, String paramName) {
+        try {
+            BigDecimal result = new BigDecimal(request.getParameter(paramName));
+            if (result.signum() < 0) {
+                throw new IllegalArgumentException(paramName + " should be a positive number");
+            }
+            return result;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(paramName + " should be a valid number");
+        }
+    }
+
+    protected Integer extractPositiveInteger(HttpServletRequest request, String paramName) {
+        return parsePositiveInteger(request.getParameter(paramName), paramName);
+    }
+
+    protected String extractNotBlankString(HttpServletRequest request, String paramName) {
+        String result = request.getParameter(paramName);
+        if (result == null || result.isBlank()) {
+            throw new IllegalArgumentException(paramName + " is required");
+        }
+        return result;
+    }
+
+    protected String[] extractNotEmptyArray(HttpServletRequest request, String paramName) {
+        String[] result = request.getParameterValues(paramName);
+        if (result == null || result.length == 0) {
+            throw new IllegalArgumentException(paramName + " is required");
+        }
+        return result;
+    }
+
+    protected List<Integer> extractIntegerList(HttpServletRequest request, String paramName) {
+        String[] values = extractNotEmptyArray(request, paramName);
+        List<Integer> result = new ArrayList<>();
+        for (String value : values) {
+            result.add(parsePositiveInteger(value, value));
+        }
+        return result;
+    }
+
+    private Integer parsePositiveInteger(String rawParam, String paramName) {
+        try {
+            int result = Integer.parseInt(rawParam);
+            if (Integer.signum(result) < 0) {
+                throw new IllegalArgumentException(paramName + " should be a positive number");
+            }
+            return result;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(paramName + " should be a valid number");
         }
     }
 }
+
