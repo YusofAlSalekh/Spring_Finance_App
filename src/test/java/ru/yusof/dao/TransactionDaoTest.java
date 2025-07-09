@@ -4,8 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import ru.yusof.exceptions.GetExpenseByCategoryException;
-import ru.yusof.exceptions.GetIncomeByCategoryException;
 import ru.yusof.exceptions.InsufficientFundsException;
 
 import java.math.BigDecimal;
@@ -52,9 +50,9 @@ class TransactionDaoTest {
 
     @Test
     void fetchExpenseByCategory_wasNotFetched() {
-        assertThrows(GetExpenseByCategoryException.class, () -> {
-            subj.fetchExpenseByCategory(1, startDate, endDate);
-        });
+        List<CategoryAmountModel> result = subj.fetchExpenseByCategory(1, startDate, endDate);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -75,9 +73,9 @@ class TransactionDaoTest {
 
     @Test
     void fetchIncomeByCategory_wasNotFetched() {
-        assertThrows(GetIncomeByCategoryException.class, () -> {
-            subj.fetchIncomeByCategory(1, startDate, endDate);
-        });
+        List<CategoryAmountModel> result = subj.fetchIncomeByCategory(1, startDate, endDate);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test

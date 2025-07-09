@@ -41,16 +41,11 @@ public class TransactionDao {
             preparedStatement.setObject(3, endDate);
 
             ResultSet resultSet = preparedStatement.executeQuery();
-            boolean found = false;
             while (resultSet.next()) {
-                found = true;
                 CategoryAmountModel categoryAmountModel = new CategoryAmountModel();
                 categoryAmountModel.setCategoryName(resultSet.getString("category_name"));
                 categoryAmountModel.setTotalAmount(resultSet.getBigDecimal("total_amount"));
                 categoryAmountModels.add(categoryAmountModel);
-            }
-            if (!found) {
-                throw new GetExpenseByCategoryException("Something went wrong during fetching exception.");
             }
             return categoryAmountModels;
         } catch (SQLException e) {
@@ -76,16 +71,11 @@ public class TransactionDao {
             preparedStatement.setObject(3, endDate);
 
             ResultSet resultSet = preparedStatement.executeQuery();
-            boolean found = false;
             while (resultSet.next()) {
-                found = true;
                 CategoryAmountModel categoryAmountModel = new CategoryAmountModel();
                 categoryAmountModel.setCategoryName(resultSet.getString("category_name"));
                 categoryAmountModel.setTotalAmount(resultSet.getBigDecimal("total_amount"));
                 categoryAmountModels.add(categoryAmountModel);
-            }
-            if (!found) {
-                throw new GetIncomeByCategoryException("Something went wrong during fetching exception.");
             }
             return categoryAmountModels;
         } catch (SQLException e) {
@@ -117,7 +107,7 @@ public class TransactionDao {
                     throw new DaoException("Failed to rollback transaction.", rollbackException);
                 }
             }
-            throw new CustomException("Error occurred during transaction.", e);
+            throw new OperationFailedException("Error occurred during transaction.", e);
         } finally {
             if (connection != null) {
                 try {
@@ -225,11 +215,11 @@ public class TransactionDao {
             ResultSet balanceResultSet = checkBalanceStatement.executeQuery();
 
             if (!balanceResultSet.next()) {
-                throw new IllegalOwnerException("Account does not belong to the user.");
+                throw new ForbiddenException("Account does not belong to the user.");
             }
 
             if (balanceResultSet.getBigDecimal("balance").compareTo(amount) < 0) {
-                throw new InsufficientFundsException("Insufficient funds in sender's account.");
+                throw new IllegalArgumentException("Insufficient funds in sender's account.");
             }
         } catch (SQLException e) {
             throw new DaoException("Error occurred while checking sender's account balance", e);

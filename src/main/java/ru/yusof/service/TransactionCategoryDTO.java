@@ -3,7 +3,7 @@ package ru.yusof.service;
 public class TransactionCategoryDTO {
     private int id;
     private String name;
-    private int client_id;
+    private int clientId;
 
     public int getId() {
         return id;
@@ -21,11 +21,20 @@ public class TransactionCategoryDTO {
         this.name = name;
     }
 
-    public int getClient_id() {
-        return client_id;
+    public int getClientId() {
+        return clientId;
     }
 
-    public void setClient_id(int client_id) {
-        this.client_id = client_id;
+    public void setClientId(int clientId) {
+        this.clientId = clientId;
+    }
+
+    @Override
+    public String toString() {
+        return "TransactionCategoryDTO{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", client_id=" + clientId +
+                '}';
     }
 }

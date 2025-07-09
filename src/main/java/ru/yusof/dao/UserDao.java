@@ -31,10 +31,7 @@ public class UserDao {
 
             UserModel userModel = null;
             if (resultSet.next()) {
-                userModel = new UserModel();
-                userModel.setId(resultSet.getInt("id"));
-                userModel.setEmail(resultSet.getString("email"));
-                userModel.setPassword(resultSet.getString("password"));
+                userModel = createUserModelByResultSet(resultSet);
             }
             return Optional.ofNullable(userModel);
         } catch (SQLException e) {
@@ -65,5 +62,31 @@ public class UserDao {
         } catch (SQLException e) {
             throw new DaoException("Error occurred during inserting new user", e);
         }
+    }
+
+    public Optional<UserModel> findById(Integer userId) {
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement("select * from client where id = ?");
+            preparedStatement.setLong(1, userId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            UserModel userModel = null;
+            if (resultSet.next()) {
+                userModel = createUserModelByResultSet(resultSet);
+            }
+            return Optional.ofNullable(userModel);
+        } catch (SQLException e) {
+            throw new DaoException("Error occurred during finding by email and hash", e);
+        }
+    }
+
+    private static UserModel createUserModelByResultSet(ResultSet resultSet) throws SQLException {
+        UserModel userModel = new UserModel();
+        userModel.setId(resultSet.getInt("id"));
+        userModel.setEmail(resultSet.getString("email"));
+        userModel.setPassword(resultSet.getString("password"));
+        return userModel;
     }
 }

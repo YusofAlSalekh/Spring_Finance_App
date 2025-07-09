@@ -12,7 +12,7 @@ public class TransactionCategoryModelToTransactionCategoryDtoConverter<S, T> imp
         TransactionCategoryDTO transactionCategoryDTO = new TransactionCategoryDTO();
         transactionCategoryDTO.setId(source.getId());
         transactionCategoryDTO.setName(source.getName());
-        transactionCategoryDTO.setClient_id(source.getClientId());
+        transactionCategoryDTO.setClientId(source.getClientId());
         return transactionCategoryDTO;
     }
 }

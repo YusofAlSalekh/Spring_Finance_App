@@ -13,7 +13,7 @@ public class AccountModelToAccountDtoConverter<S, T> implements Converter<Accoun
         accountDTO.setId(source.getId());
         accountDTO.setName(source.getName());
         accountDTO.setBalance(source.getBalance());
-        accountDTO.setClient_id(source.getClient_id());
+        accountDTO.setClientId(source.getClientId());
         return accountDTO;
     }
 }

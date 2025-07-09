@@ -35,7 +35,7 @@ class TransactionCategoryServiceTest {
         when(transactionCategoryDao.createTransactionCategory("name", 1)).thenReturn(transactionCategoryModel);
 
         TransactionCategoryDTO transactionCategoryDTO = new TransactionCategoryDTO();
-        transactionCategoryDTO.setClient_id(1);
+        transactionCategoryDTO.setClientId(1);
         transactionCategoryDTO.setId(1);
         transactionCategoryDTO.setName("name");
         when(transactionCategoryModelToTransactionCategoryDtoConverter.convert(transactionCategoryModel)).thenReturn(transactionCategoryDTO);
