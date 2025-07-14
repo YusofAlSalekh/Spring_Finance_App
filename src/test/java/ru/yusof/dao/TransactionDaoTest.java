@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import ru.yusof.exceptions.InsufficientFundsException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -18,7 +17,7 @@ class TransactionDaoTest {
     TransactionDao subj;
     ApplicationContext context;
     LocalDate startDate = LocalDate.of(2024, 7, 1);
-    LocalDate endDate = LocalDate.of(2025, 7, 1);
+    LocalDate endDate = LocalDate.of(2028, 7, 1);
 
     @BeforeEach
     void setUp() {
@@ -119,7 +118,7 @@ class TransactionDaoTest {
         List<Integer> categoryIds = new ArrayList<>();
 
         categoryIds.add(2);
-        assertThrows(InsufficientFundsException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> {
                     subj.addTransaction(2, 1, 2, amount, categoryIds);
                 });

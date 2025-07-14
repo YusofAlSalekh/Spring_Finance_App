@@ -1,0 +1,116 @@
+package ru.yusof.Web;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.context.ApplicationContext;
+import ru.yusof.controller.AuthorisationController;
+import ru.yusof.controller.Controller;
+import ru.yusof.controller.SecureController;
+import ru.yusof.exceptions.*;
+import ru.yusof.json.AuthRequest;
+import ru.yusof.json.AuthResponse;
+import ru.yusof.json.ErrorResponse;
+import ru.yusof.view.SpringContext;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+public class MainServlet extends HttpServlet {
+    private Map<String, Controller> controllers = new HashMap<>();
+    private Map<String, SecureController> secureControllers = new HashMap<>();
+    private ObjectMapper om = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+    public MainServlet() {
+        ApplicationContext context = SpringContext.getContext();
+
+        for (String beanName : context.getBeanNamesForType(Controller.class)) {
+            controllers.put(beanName, context.getBean(beanName, Controller.class));
+        }
+
+        for (String beanName : context.getBeanNamesForType(SecureController.class)) {
+            secureControllers.put(beanName, context.getBean(beanName, SecureController.class));
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+        String uri = req.getRequestURI();
+        res.setContentType("application/json");
+
+        try {
+            Controller controller = controllers.get(uri);
+            if (controller != null) {
+                if (controller instanceof AuthorisationController) {
+                    AuthorisationController authController = (AuthorisationController) controller;
+
+                    AuthRequest authRequest = om.readValue(req.getInputStream(), authController.getRequestClass());
+                    AuthResponse authResponse = authController.handle(authRequest);
+
+                    if (authResponse == null) {
+                        res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    } else {
+                        HttpSession session = req.getSession();
+                        session.setAttribute("userId", authResponse.getId());
+                        om.writeValue(res.getWriter(), authResponse);
+                    }
+                } else {
+                    om.writeValue(res.getWriter(), controller.handle(
+                                    om.readValue(req.getInputStream(), controller.getRequestClass())
+                            )
+                    );
+                }
+            } else {
+                SecureController secureController = secureControllers.get(uri);
+                if (secureController != null) {
+                    HttpSession session = req.getSession();
+                    Integer userId = (Integer) session.getAttribute("userId");
+                    if (userId == null) {
+                        res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    } else {
+                        om.writeValue(res.getWriter(), secureController.handle(
+                                        om.readValue(req.getInputStream(), secureController.getRequestClass()),
+                                        userId
+                                )
+                        );
+                    }
+                } else {
+                    res.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                }
+            }
+        } catch (UnauthorizedException e) {
+            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            om.writeValue(res.getWriter(), new ErrorResponse(e.getMessage()));
+        } catch (AlreadyExistsException e) {
+            res.setStatus(HttpServletResponse.SC_CONFLICT);
+            om.writeValue(res.getWriter(), new ErrorResponse(e.getMessage()));
+        } catch (NotFoundException e) {
+            res.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            om.writeValue(res.getWriter(), new ErrorResponse(e.getMessage()));
+        } catch (OperationFailedException e) {
+            res.setStatus(HttpServletResponse.SC_EXPECTATION_FAILED);
+            om.writeValue(res.getWriter(), new ErrorResponse(e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            om.writeValue(res.getWriter(), new ErrorResponse(e.getMessage()));
+        } catch (ForbiddenException e) {
+            res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            om.writeValue(res.getWriter(), new ErrorResponse(e.getMessage()));
+        } catch (InvalidFormatException e) {
+            res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            om.writeValue(res.getWriter(), new ErrorResponse("Invalid data type"));
+        } catch (Exception e) {
+            res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            om.writeValue(res.getWriter(), new ErrorResponse(e.getMessage()));
+        }
+    }
+}

@@ -1,0 +1,8 @@
+package ru.yusof.json;
+
+import lombok.Data;
+
+@Data
+public class AccountDeletionRequest {
+    private Integer accountId;
+}
