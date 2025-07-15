@@ -44,49 +44,14 @@ public class MainServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        String uri = req.getRequestURI();
         res.setContentType("application/json");
+        handleRequest(req, res);
+    }
+
+    private void handleRequest(HttpServletRequest req, HttpServletResponse res) throws IOException {
 
         try {
-            Controller controller = controllers.get(uri);
-            if (controller != null) {
-                if (controller instanceof AuthorisationController) {
-                    AuthorisationController authController = (AuthorisationController) controller;
-
-                    AuthorizationRequest authorizationRequest = om.readValue(req.getInputStream(), authController.getRequestClass());
-                    AuthorizationResponse authorizationResponse = authController.handle(authorizationRequest);
-
-                    if (authorizationResponse == null) {
-                        res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    } else {
-                        HttpSession session = req.getSession();
-                        session.setAttribute("userId", authorizationResponse.getId());
-                        om.writeValue(res.getWriter(), authorizationResponse);
-                    }
-                } else {
-                    om.writeValue(res.getWriter(), controller.handle(
-                                    om.readValue(req.getInputStream(), controller.getRequestClass())
-                            )
-                    );
-                }
-            } else {
-                SecureController secureController = secureControllers.get(uri);
-                if (secureController != null) {
-                    HttpSession session = req.getSession();
-                    Integer userId = (Integer) session.getAttribute("userId");
-                    if (userId == null) {
-                        res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    } else {
-                        om.writeValue(res.getWriter(), secureController.handle(
-                                        om.readValue(req.getInputStream(), secureController.getRequestClass()),
-                                        userId
-                                )
-                        );
-                    }
-                } else {
-                    res.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                }
-            }
+            dispatchToController(req, res);
         } catch (UnauthorizedException e) {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             om.writeValue(res.getWriter(), new ErrorResponse(e.getMessage()));
@@ -111,6 +76,61 @@ public class MainServlet extends HttpServlet {
         } catch (Exception e) {
             res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             om.writeValue(res.getWriter(), new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    private void dispatchToController(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        String uri = req.getRequestURI();
+        Controller controller = controllers.get(uri);
+
+        if (controller != null) {
+            handleController(req, res, controller);
+            return;
+        }
+        SecureController secureController = secureControllers.get(uri);
+
+        if (secureController != null) {
+            handleSecureController(req, res, secureController);
+            return;
+        }
+        res.setStatus(HttpServletResponse.SC_NOT_FOUND);
+    }
+
+    private void handleSecureController(HttpServletRequest req, HttpServletResponse res, SecureController secureController) throws IOException {
+        HttpSession session = req.getSession();
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) {
+            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        } else {
+            om.writeValue(res.getWriter(), secureController.handle(
+                            om.readValue(req.getInputStream(), secureController.getRequestClass()),
+                            userId
+                    )
+            );
+        }
+    }
+
+    private void handleController(HttpServletRequest req, HttpServletResponse res, Controller controller) throws IOException {
+        if (controller instanceof AuthorisationController) {
+            handleAuthController(req, res, (AuthorisationController) controller);
+        } else {
+            om.writeValue(res.getWriter(), controller.handle(
+                            om.readValue(req.getInputStream(), controller.getRequestClass())
+                    )
+            );
+        }
+    }
+
+    private void handleAuthController(HttpServletRequest req, HttpServletResponse res, AuthorisationController controller) throws IOException {
+        AuthorizationRequest authorizationRequest = om.readValue(req.getInputStream(), controller.getRequestClass());
+        AuthorizationResponse authorizationResponse = controller.handle(authorizationRequest);
+
+        if (authorizationResponse == null) {
+            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        } else {
+            HttpSession session = req.getSession();
+            session.setAttribute("userId", authorizationResponse.getId());
+            om.writeValue(res.getWriter(), authorizationResponse);
         }
     }
 }
