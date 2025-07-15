@@ -1,9 +1,9 @@
-package ru.yusof.json;
+package ru.yusof.json.request;
 
 import lombok.Data;
 
 @Data
 public class RegistrationRequest {
-    String login;
-    String password;
+    private String login;
+    private String password;
 }

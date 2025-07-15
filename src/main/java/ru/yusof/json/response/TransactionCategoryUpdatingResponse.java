@@ -1,4 +1,4 @@
-package ru.yusof.json;
+package ru.yusof.json.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class TransactionCategoryUpdatingResponse {
-    Integer id;
-    String name;
+    private Integer id;
+    private String name;
 }

@@ -1,4 +1,4 @@
-package ru.yusof.Web;
+package ru.yusof.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -9,9 +9,9 @@ import ru.yusof.controller.AuthorisationController;
 import ru.yusof.controller.Controller;
 import ru.yusof.controller.SecureController;
 import ru.yusof.exceptions.*;
-import ru.yusof.json.AuthRequest;
-import ru.yusof.json.AuthResponse;
-import ru.yusof.json.ErrorResponse;
+import ru.yusof.json.request.AuthorizationRequest;
+import ru.yusof.json.response.AuthorizationResponse;
+import ru.yusof.json.response.ErrorResponse;
 import ru.yusof.view.SpringContext;
 
 import javax.servlet.ServletException;
@@ -53,15 +53,15 @@ public class MainServlet extends HttpServlet {
                 if (controller instanceof AuthorisationController) {
                     AuthorisationController authController = (AuthorisationController) controller;
 
-                    AuthRequest authRequest = om.readValue(req.getInputStream(), authController.getRequestClass());
-                    AuthResponse authResponse = authController.handle(authRequest);
+                    AuthorizationRequest authorizationRequest = om.readValue(req.getInputStream(), authController.getRequestClass());
+                    AuthorizationResponse authorizationResponse = authController.handle(authorizationRequest);
 
-                    if (authResponse == null) {
+                    if (authorizationResponse == null) {
                         res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     } else {
                         HttpSession session = req.getSession();
-                        session.setAttribute("userId", authResponse.getId());
-                        om.writeValue(res.getWriter(), authResponse);
+                        session.setAttribute("userId", authorizationResponse.getId());
+                        om.writeValue(res.getWriter(), authorizationResponse);
                     }
                 } else {
                     om.writeValue(res.getWriter(), controller.handle(

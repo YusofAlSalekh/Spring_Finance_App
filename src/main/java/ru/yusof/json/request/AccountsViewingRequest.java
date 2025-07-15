@@ -1,4 +1,4 @@
-package ru.yusof.json;
+package ru.yusof.json.request;
 
 import lombok.Data;
 

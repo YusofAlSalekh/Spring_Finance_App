@@ -2,8 +2,8 @@ package ru.yusof.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yusof.json.RegistrationRequest;
-import ru.yusof.json.RegistrationResponse;
+import ru.yusof.json.request.RegistrationRequest;
+import ru.yusof.json.response.RegistrationResponse;
 import ru.yusof.service.AuthorizationService;
 import ru.yusof.service.UserDTO;
 

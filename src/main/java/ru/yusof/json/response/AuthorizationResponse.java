@@ -1,11 +1,11 @@
-package ru.yusof.json;
+package ru.yusof.json.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class AuthResponse {
-private  int id;
-private String email;
+public class AuthorizationResponse {
+    private int id;
+    private String email;
 }

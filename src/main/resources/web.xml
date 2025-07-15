@@ -5,7 +5,7 @@
          version="3.1">
     <servlet>
         <servlet-name>MainServlet</servlet-name>
-        <servlet-class>ru.yusof.Web.MainServlet</servlet-class>
+        <servlet-class>ru.yusof.web.MainServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>MainServlet</servlet-name>

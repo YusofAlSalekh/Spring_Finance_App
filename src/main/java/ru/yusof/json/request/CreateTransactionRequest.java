@@ -1,9 +1,8 @@
-package ru.yusof.json;
+package ru.yusof.json.request;
 
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.List;
 
 @Data

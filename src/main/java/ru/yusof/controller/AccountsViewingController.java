@@ -2,8 +2,8 @@ package ru.yusof.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yusof.json.AccountsViewingRequest;
-import ru.yusof.json.AccountsViewingResponse;
+import ru.yusof.json.request.AccountsViewingRequest;
+import ru.yusof.json.response.AccountsViewingResponse;
 import ru.yusof.service.AccountDTO;
 import ru.yusof.service.AccountService;
 

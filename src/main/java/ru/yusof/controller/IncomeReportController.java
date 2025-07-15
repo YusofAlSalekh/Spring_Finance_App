@@ -3,8 +3,8 @@ package ru.yusof.controller;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yusof.dao.CategoryAmountModel;
-import ru.yusof.json.IncomeReportRequest;
-import ru.yusof.json.IncomeReportResponse;
+import ru.yusof.json.request.IncomeReportRequest;
+import ru.yusof.json.response.IncomeReportResponse;
 import ru.yusof.service.TransactionService;
 
 import java.util.List;

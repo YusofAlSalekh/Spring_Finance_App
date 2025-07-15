@@ -2,8 +2,8 @@ package ru.yusof.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yusof.json.TransactionCategoryViewingRequest;
-import ru.yusof.json.TransactionCategoryViewingResponse;
+import ru.yusof.json.request.TransactionCategoryViewingRequest;
+import ru.yusof.json.response.TransactionCategoryViewingResponse;
 import ru.yusof.service.TransactionCategoryDTO;
 import ru.yusof.service.TransactionCategoryService;
 

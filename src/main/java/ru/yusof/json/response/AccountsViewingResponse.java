@@ -1,11 +1,9 @@
-package ru.yusof.json;
+package ru.yusof.json.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import ru.yusof.service.AccountDTO;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Data

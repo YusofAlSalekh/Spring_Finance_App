@@ -1,4 +1,4 @@
-package ru.yusof.json;
+package ru.yusof.json.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,5 +7,5 @@ import ru.yusof.service.TransactionCategoryDTO;
 @Data
 @AllArgsConstructor
 public class TransactionCategoryCreationResponse {
-    TransactionCategoryDTO transactionCategory;
+    private TransactionCategoryDTO transactionCategory;
 }

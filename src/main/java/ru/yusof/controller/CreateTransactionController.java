@@ -2,8 +2,8 @@ package ru.yusof.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yusof.json.CreateTransactionRequest;
-import ru.yusof.json.CreateTransactionResponse;
+import ru.yusof.json.request.CreateTransactionRequest;
+import ru.yusof.json.response.CreateTransactionResponse;
 import ru.yusof.service.TransactionService;
 
 import java.math.BigDecimal;
@@ -18,10 +18,10 @@ public class CreateTransactionController implements SecureController<CreateTrans
 
     @Override
     public CreateTransactionResponse handle(CreateTransactionRequest request, Integer userId) {
-        BigDecimal amount = extractPositiveBigDecimal(request.getAmount());
-        int senderAccountId = extractPositiveInteger(request.getSenderAccountId());
-        int receiverAccountId = extractPositiveInteger(request.getReceiverAccountId());
-        List<Integer> categoryIds = extractIntegerList(request.getCategoryIds());
+        BigDecimal amount = validatePositiveBigDecimal(request.getAmount());
+        int senderAccountId = validatePositiveInteger(request.getSenderAccountId());
+        int receiverAccountId = validatePositiveInteger(request.getReceiverAccountId());
+        List<Integer> categoryIds = validateIntegerList(request.getCategoryIds());
 
         transactionService.performTransaction(senderAccountId, receiverAccountId, userId, amount, categoryIds);
         return new CreateTransactionResponse("Transaction created successfully");

@@ -1,4 +1,4 @@
-package ru.yusof.json;
+package ru.yusof.json.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class TransactionCategoryDeletionResponse {
-    String message;
+    private String message;
 }

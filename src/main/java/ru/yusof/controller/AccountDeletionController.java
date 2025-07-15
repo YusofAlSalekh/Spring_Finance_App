@@ -2,11 +2,11 @@ package ru.yusof.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yusof.json.AccountDeletionRequest;
-import ru.yusof.json.AccountDeletionResponse;
+import ru.yusof.json.request.AccountDeletionRequest;
+import ru.yusof.json.response.AccountDeletionResponse;
 import ru.yusof.service.AccountService;
 
-import static ru.yusof.controller.ValidationUtils.extractPositiveInteger;
+import static ru.yusof.controller.ValidationUtils.validatePositiveInteger;
 
 @RequiredArgsConstructor
 @Service("/account/delete")
@@ -15,7 +15,7 @@ public class AccountDeletionController implements SecureController<AccountDeleti
 
     @Override
     public AccountDeletionResponse handle(AccountDeletionRequest request, Integer userId) {
-        Integer accountId = extractPositiveInteger(request.getAccountId());
+        Integer accountId = validatePositiveInteger(request.getAccountId());
         accountService.deleteAccount(accountId, userId);
         return new AccountDeletionResponse("Account deleted successfully");
     }
