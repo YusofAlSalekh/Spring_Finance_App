@@ -4,8 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import ru.yusof.exceptions.AddingTransactionCategoryException;
-import ru.yusof.exceptions.DeletionTransactionCategoryException;
+import ru.yusof.exceptions.NotFoundException;
+import ru.yusof.exceptions.OperationFailedException;
 
 import java.util.UUID;
 
@@ -37,7 +37,7 @@ class TransactionCategoryDaoTest {
 
     @Test
     void deleteTransactionType_transactionTypeWasNotDeleted() {
-        assertThrows(DeletionTransactionCategoryException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             subj.deleteTransactionCategory(1, 100);
         });
     }
@@ -47,15 +47,14 @@ class TransactionCategoryDaoTest {
         boolean result = subj.deleteTransactionCategory(2, 1);
 
         assertTrue(result);
-
-        assertThrows(DeletionTransactionCategoryException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             subj.deleteTransactionCategory(2, 1);
         });
     }
 
     @Test
     void editTransactionType_transactionTypeWasNotEdited() {
-        assertThrows(AddingTransactionCategoryException.class, () -> {
+        assertThrows(OperationFailedException.class, () -> {
             subj.editTransactionCategory("health", 1, 100);
         });
     }

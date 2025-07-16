@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import ru.yusof.exceptions.DeletionAccountException;
+import ru.yusof.exceptions.NotFoundException;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -69,7 +69,7 @@ class AccountDaoTest {
         int nonExistentAccountId = 10;
         int clientId = 1;
 
-        assertThrows(DeletionAccountException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             subj.deleteAccount(nonExistentAccountId, clientId);
         }, "No account found with ID: " + nonExistentAccountId + " for client ID: " + clientId);
     }
