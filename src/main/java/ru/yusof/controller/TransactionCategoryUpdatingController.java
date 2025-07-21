@@ -16,8 +16,11 @@ public class TransactionCategoryUpdatingController implements SecureController<T
 
     @Override
     public TransactionCategoryUpdatingResponse handle(TransactionCategoryUpdatingRequest request, Integer userId) {
-        String newName = validateNotBlankString(request.getName());
-        int transactionCategoryId = validatePositiveInteger(request.getId());
+        validateNotBlankString(request.getName());
+        String newName = request.getName();
+
+        validatePositiveInteger(request.getId());
+        Integer transactionCategoryId = request.getId();
 
         transactionCategoryService.editTransactionCategory(newName, transactionCategoryId, userId);
         return new TransactionCategoryUpdatingResponse(transactionCategoryId, newName);

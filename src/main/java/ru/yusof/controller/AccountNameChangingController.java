@@ -17,8 +17,11 @@ public class AccountNameChangingController implements SecureController<AccountNa
 
     @Override
     public AccountNameChangingResponse handle(AccountNameChangingRequest request, Integer userId) {
-        String accountName = validateNotBlankString(request.getName());
-        Integer accountId = validatePositiveInteger(request.getAccountId());
+        validateNotBlankString(request.getName());
+        String accountName = request.getName();
+
+        validatePositiveInteger(request.getAccountId());
+        Integer accountId = request.getAccountId();
 
         AccountDTO updatedAccountName = accountService.updateAccountName(accountName, accountId, userId);
         return new AccountNameChangingResponse(updatedAccountName.getName());

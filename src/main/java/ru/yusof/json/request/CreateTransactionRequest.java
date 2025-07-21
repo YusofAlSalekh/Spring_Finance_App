@@ -9,6 +9,6 @@ import java.util.List;
 public class CreateTransactionRequest {
     private List<Integer> categoryIds;
     private BigDecimal amount;
-    private int senderAccountId;
-    private int receiverAccountId;
+    private Integer senderAccountId;
+    private Integer receiverAccountId;
 }

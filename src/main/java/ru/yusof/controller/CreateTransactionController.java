@@ -18,10 +18,17 @@ public class CreateTransactionController implements SecureController<CreateTrans
 
     @Override
     public CreateTransactionResponse handle(CreateTransactionRequest request, Integer userId) {
-        BigDecimal amount = validatePositiveBigDecimal(request.getAmount());
-        int senderAccountId = validatePositiveInteger(request.getSenderAccountId());
-        int receiverAccountId = validatePositiveInteger(request.getReceiverAccountId());
-        List<Integer> categoryIds = validateIntegerList(request.getCategoryIds());
+        validatePositiveBigDecimal(request.getAmount());
+        BigDecimal amount = request.getAmount();
+
+        validatePositiveInteger(request.getSenderAccountId());
+        Integer senderAccountId = request.getSenderAccountId();
+
+        validatePositiveInteger(request.getReceiverAccountId());
+        Integer receiverAccountId = request.getReceiverAccountId();
+
+        List<Integer> categoryIds = request.getCategoryIds();
+        validateIntegerList(request.getCategoryIds());
 
         transactionService.performTransaction(senderAccountId, receiverAccountId, userId, amount, categoryIds);
         return new CreateTransactionResponse("Transaction created successfully");

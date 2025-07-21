@@ -15,7 +15,8 @@ public class TransactionCategoryDeletionController implements SecureController<T
 
     @Override
     public TransactionCategoryDeletionResponse handle(TransactionCategoryDeletionRequest request, Integer userId) {
-        Integer transactionCategoryId = validatePositiveInteger(request.getId());
+        validatePositiveInteger(request.getId());
+        Integer transactionCategoryId = request.getId();
 
         transactionCategoryService.deleteTransactionCategory(transactionCategoryId, userId);
         return new TransactionCategoryDeletionResponse("Transaction Category Deleted Successful");
