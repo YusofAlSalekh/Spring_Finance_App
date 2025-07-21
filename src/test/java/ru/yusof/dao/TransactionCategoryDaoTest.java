@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import ru.yusof.entity.TransactionCategoryModel;
+import ru.yusof.exceptions.AlreadyExistsException;
 import ru.yusof.exceptions.NotFoundException;
 import ru.yusof.exceptions.OperationFailedException;
 
@@ -54,14 +56,14 @@ class TransactionCategoryDaoTest {
 
     @Test
     void editTransactionType_transactionTypeWasNotEdited() {
-        assertThrows(OperationFailedException.class, () -> {
-            subj.editTransactionCategory("health", 1, 100);
+        assertThrows(NotFoundException.class, () -> {
+            subj.updateTransactionCategoryName("health", 1, 100);
         });
     }
 
     @Test
     void editTransactionType_transactionTypeWasEdited() {
-        boolean result = subj.editTransactionCategory("health", 2, 1);
+        boolean result = subj.updateTransactionCategoryName("health", 2, 1);
 
         assertTrue(result);
     }

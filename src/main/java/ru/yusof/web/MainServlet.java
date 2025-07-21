@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,6 +48,14 @@ public class MainServlet extends HttpServlet {
         res.setContentType("application/json");
         handleRequest(req, res);
     }
+ /* @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+          throws ServletException, IOException {
+
+      resp.setContentType("text/html");
+      PrintWriter out = resp.getWriter();
+      out.println("<h1>MainServlet is working!</h1>");
+  }*/
 
     private void handleRequest(HttpServletRequest req, HttpServletResponse res) throws IOException {
 

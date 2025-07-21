@@ -1,103 +1,86 @@
 package ru.yusof.dao;
 
 import org.springframework.stereotype.Service;
-import ru.yusof.exceptions.*;
+import ru.yusof.entity.TransactionCategoryModel;
+import ru.yusof.exceptions.AlreadyExistsException;
+import ru.yusof.exceptions.DaoException;
+import ru.yusof.exceptions.NotFoundException;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
+import javax.transaction.Transactional;
 import java.util.List;
-
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
 @Service
 public class TransactionCategoryDao {
-    private final DataSource dataSource;
+    @PersistenceContext
+    private EntityManager em;
 
-    public TransactionCategoryDao(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
+    @Transactional
     public TransactionCategoryModel createTransactionCategory(String name, int clientId) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement("insert into category (name,client_id) values (?,?)",
-                    RETURN_GENERATED_KEYS);
-            preparedStatement.setString(1, name);
-            preparedStatement.setInt(2, clientId);
-            int affectedRows = preparedStatement.executeUpdate();
-            if (affectedRows == 0) {
-                throw new OperationFailedException("Creating transaction category failed, no rows affected.");
-            }
+        try {
+            TransactionCategoryModel transactionCategoryModel = new TransactionCategoryModel();
+            transactionCategoryModel.setName(name);
+            transactionCategoryModel.setClientId(clientId);
+            em.persist(transactionCategoryModel);
 
-            ResultSet resultSet = preparedStatement.getGeneratedKeys();
-            if (resultSet.next()) {
-                TransactionCategoryModel transactionCategoryModel = new TransactionCategoryModel();
-                transactionCategoryModel.setId(resultSet.getInt(1));
-                transactionCategoryModel.setName(name);
-                transactionCategoryModel.setClientId(clientId);
-                return transactionCategoryModel;
-            } else {
-                throw new OperationFailedException("Creating transaction type failed, no ID obtained.");
-            }
-        } catch (SQLException e) {
+            return transactionCategoryModel;
+        } catch (PersistenceException e) {
             throw new DaoException("Error occurred during transaction type creation", e);
         }
     }
 
+    @Transactional
     public boolean deleteTransactionCategory(int transactionCategoryId, int clientId) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement =
-                    connection.prepareStatement("delete from category where id = ? and client_id = ?");
-            preparedStatement.setInt(1, transactionCategoryId);
-            preparedStatement.setInt(2, clientId);
-            int affectedRows = preparedStatement.executeUpdate();
-            if (affectedRows == 0) {
-                throw new NotFoundException("No transaction type found with ID: " + transactionCategoryId);
-            }
-            return true;
-        } catch (SQLException e) {
+        try {
+            TransactionCategoryModel transactionCategoryModel = em.find(TransactionCategoryModel.class, transactionCategoryId);
+            transactionCategoryExistenceValidation(transactionCategoryId, clientId, transactionCategoryModel);
+
+            em.remove(transactionCategoryModel);
+        } catch (PersistenceException e) {
             throw new DaoException("Error occurred while deleting transaction type", e);
         }
+        return true;
     }
 
-    public boolean editTransactionCategory(String newName, int transactionCategoryId, int clientId) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement =
-                    connection.prepareStatement("update category set name = ? where id = ? and client_id = ?");
-            preparedStatement.setString(1, newName);
-            preparedStatement.setInt(2, transactionCategoryId);
-            preparedStatement.setInt(3, clientId);
-            int affectedRows = preparedStatement.executeUpdate();
-            if (affectedRows == 0) {
-                throw new OperationFailedException("No transaction type found with ID: " + transactionCategoryId);
+    @Transactional
+    public boolean updateTransactionCategoryName(String name, int transactionCategoryId, int clientId) {
+        try {
+            Long count = em.createQuery("select count(tc) from TransactionCategoryModel tc where tc.name = :name and tc.id <> :transactionCategoryId and tc.clientId = :clientId", Long.class)
+                    .setParameter("name", name)
+                    .setParameter("transactionCategoryId", transactionCategoryId)
+                    .setParameter("clientId", clientId)
+                    .getSingleResult();
+
+            if (count > 0) {
+                throw new AlreadyExistsException("The category with this name already exists");
             }
+
+            TransactionCategoryModel transactionCategoryModel = em.find(TransactionCategoryModel.class, transactionCategoryId);
+
+            transactionCategoryExistenceValidation(transactionCategoryId, clientId, transactionCategoryModel);
+
+            transactionCategoryModel.setName(name);
             return true;
-        } catch (SQLException e) {
-            throw new DaoException("Error occurred during transaction type editing", e);
+        } catch (PersistenceException e) {
+            throw new DaoException("Error occurred during transaction name updating", e);
         }
     }
 
     public List<TransactionCategoryModel> findByClientID(int clientId) {
-        List<TransactionCategoryModel> transactionCategoryModels = new ArrayList<>();
+        try {
+            return em.createQuery("select tc from TransactionCategoryModel tc where tc.clientId = :clientId", TransactionCategoryModel.class)
+                    .setParameter("clientId", clientId)
+                    .getResultList();
+        } catch (PersistenceException e) {
+            throw new DaoException("Database error occurred while fetching category by client Id.", e);
+        }
+    }
 
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement("select * from category where client_id = ?");
-            preparedStatement.setInt(1, clientId);
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                TransactionCategoryModel transactionCategoryModel = new TransactionCategoryModel();
-                transactionCategoryModel.setId(resultSet.getInt("id"));
-                transactionCategoryModel.setName(resultSet.getString("name"));
-                transactionCategoryModel.setClientId(resultSet.getInt("client_id"));
-                transactionCategoryModels.add(transactionCategoryModel);
-            }
-            return transactionCategoryModels;
-        } catch (SQLException e) {
-            throw new DaoException("Database error occurred while fetching category by client ID.", e);
+    private static void transactionCategoryExistenceValidation(int transactionCategoryId, int clientId, TransactionCategoryModel transactionCategoryModel) {
+        if (transactionCategoryModel == null || transactionCategoryModel.getClientId() != clientId) {
+            throw new NotFoundException("No transaction category found with Id: " + transactionCategoryId);
         }
     }
 }

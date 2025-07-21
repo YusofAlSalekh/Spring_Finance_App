@@ -3,11 +3,9 @@ package ru.yusof.service;
 import org.springframework.stereotype.Service;
 import ru.yusof.converter.Converter;
 import ru.yusof.dao.UserDao;
-import ru.yusof.dao.UserModel;
+import ru.yusof.entity.UserModel;
 import ru.yusof.exceptions.BadCredentialsException;
-import ru.yusof.exceptions.DaoException;
 import ru.yusof.exceptions.NotFoundException;
-import ru.yusof.exceptions.UserNotFoundByIdException;
 
 @Service
 public class AuthorizationService {
@@ -40,7 +38,7 @@ public class AuthorizationService {
 
     public UserDTO register(String email, String password) {
         String hash = digestService.hex(password);
-        UserModel userModel = userDao.insert(email, hash);
+        UserModel userModel = userDao.addUser(email, hash);
         return userDtoConverter.convert(userModel);
     }
 

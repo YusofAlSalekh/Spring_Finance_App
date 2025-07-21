@@ -3,7 +3,7 @@ package ru.yusof.service;
 import org.springframework.stereotype.Service;
 import ru.yusof.converter.Converter;
 import ru.yusof.dao.AccountDao;
-import ru.yusof.dao.AccountModel;
+import ru.yusof.entity.AccountModel;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

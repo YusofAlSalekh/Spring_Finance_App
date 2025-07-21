@@ -2,7 +2,7 @@ package ru.yusof.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yusof.dao.CategoryAmountModel;
+import ru.yusof.entity.CategoryAmountModel;
 import ru.yusof.json.request.IncomeReportRequest;
 import ru.yusof.json.response.IncomeReportResponse;
 import ru.yusof.service.TransactionService;

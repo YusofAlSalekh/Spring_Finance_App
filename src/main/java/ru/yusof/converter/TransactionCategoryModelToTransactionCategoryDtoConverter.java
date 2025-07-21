@@ -1,7 +1,7 @@
 package ru.yusof.converter;
 
 import org.springframework.stereotype.Service;
-import ru.yusof.dao.TransactionCategoryModel;
+import ru.yusof.entity.TransactionCategoryModel;
 import ru.yusof.service.TransactionCategoryDTO;
 
 @Service

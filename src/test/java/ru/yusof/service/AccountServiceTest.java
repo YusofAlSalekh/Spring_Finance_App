@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.yusof.converter.AccountModelToAccountDtoConverter;
 import ru.yusof.dao.AccountDao;
-import ru.yusof.dao.AccountModel;
+import ru.yusof.entity.AccountModel;
 import ru.yusof.exceptions.CreatingAccountException;
 import ru.yusof.exceptions.DeletionAccountException;
 

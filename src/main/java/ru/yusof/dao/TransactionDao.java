@@ -1,228 +1,185 @@
 package ru.yusof.dao;
 
 import org.springframework.stereotype.Service;
-import ru.yusof.exceptions.*;
+import ru.yusof.entity.AccountModel;
+import ru.yusof.entity.CategoryAmountModel;
+import ru.yusof.entity.TransactionCategoryModel;
+import ru.yusof.entity.TransactionModel;
+import ru.yusof.exceptions.DaoException;
+import ru.yusof.exceptions.ForbiddenException;
+import ru.yusof.exceptions.NotFoundException;
+import ru.yusof.exceptions.OperationFailedException;
 
-import javax.sql.DataSource;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
-
 @Service
 public class TransactionDao {
-    private final DataSource dataSource;
-
-    public TransactionDao(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
+    @PersistenceContext
+    private EntityManager em;
 
     public List<CategoryAmountModel> fetchExpenseByCategory(int clientId, LocalDate startDate, LocalDate endDate) {
-        List<CategoryAmountModel> categoryAmountModels = new ArrayList<>();
-        String sql =
-                "SELECT cat.name AS category_name, SUM(trans.amount) AS total_amount " +
-                        "FROM transaction trans " +
-                        "JOIN transaction_to_category ttc ON ttc.transaction_id = trans.id " +
-                        "JOIN category cat ON cat.id = ttc.category_id " +
-                        "JOIN account acc ON acc.id = trans.sender_account_id " +
-                        "WHERE acc.client_id = ? AND trans.created_date BETWEEN ? AND ? " +
-                        "GROUP BY cat.name;";
-
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1, clientId);
-            preparedStatement.setObject(2, startDate);
-            preparedStatement.setObject(3, endDate);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                CategoryAmountModel categoryAmountModel = new CategoryAmountModel();
-                categoryAmountModel.setCategoryName(resultSet.getString("category_name"));
-                categoryAmountModel.setTotalAmount(resultSet.getBigDecimal("total_amount"));
-                categoryAmountModels.add(categoryAmountModel);
-            }
-            return categoryAmountModels;
-        } catch (SQLException e) {
-            throw new DaoException("Database error during expense data fetch", e);
+        try {
+            Timestamp start = Timestamp.valueOf(startDate.atStartOfDay());
+            Timestamp end = Timestamp.valueOf(endDate.plusDays(1).atStartOfDay());
+            return em.createQuery("select new ru.yusof.entity.CategoryAmountModel(c.name, sum(t.amount)) " +
+                                    "from TransactionModel t " +
+                                    "join t.categories c " +
+                                    "join t.sender s " +
+                                    "where s.clientId = :clientId and t.createdDate between :start and :end " +
+                                    "group by c.name",
+                            CategoryAmountModel.class
+                    )
+                    .setParameter("clientId", clientId)
+                    .setParameter("start", start)
+                    .setParameter("end", end)
+                    .getResultList();
+        } catch (PersistenceException e) {
+            throw new DaoException("Error during fetching expenses by category", e);
         }
     }
 
     public List<CategoryAmountModel> fetchIncomeByCategory(int clientId, LocalDate startDate, LocalDate endDate) {
-        List<CategoryAmountModel> categoryAmountModels = new ArrayList<>();
-        String sql =
-                "SELECT cat.name AS category_name, SUM(trans.amount) AS total_amount " +
-                        "FROM transaction trans " +
-                        "JOIN transaction_to_category ttc ON trans.id = ttc.transaction_id " +
-                        "JOIN category cat ON ttc.category_id = cat.id " +
-                        "JOIN account acc ON trans.receiver_account_id = acc.id " +
-                        "WHERE acc.client_id = ? AND trans.created_date BETWEEN ? AND ? " +
-                        "GROUP BY cat.name;";
-
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1, clientId);
-            preparedStatement.setObject(2, startDate);
-            preparedStatement.setObject(3, endDate);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                CategoryAmountModel categoryAmountModel = new CategoryAmountModel();
-                categoryAmountModel.setCategoryName(resultSet.getString("category_name"));
-                categoryAmountModel.setTotalAmount(resultSet.getBigDecimal("total_amount"));
-                categoryAmountModels.add(categoryAmountModel);
-            }
-            return categoryAmountModels;
-        } catch (SQLException e) {
-            throw new DaoException("Database error during income data fetch", e);
+        try {
+            Timestamp start = Timestamp.valueOf(startDate.atStartOfDay());
+            Timestamp end = Timestamp.valueOf(endDate.plusDays(1).atStartOfDay());
+            return em.createQuery("select new ru.yusof.entity.CategoryAmountModel(c.name, sum(t.amount)) " +
+                                    "from TransactionModel t " +
+                                    "join t.receiver s " +
+                                    "join t.categories c " +
+                                    "where s.clientId = :clientId and t.createdDate between :start and :end " +
+                                    "group by c.name",
+                            CategoryAmountModel.class)
+                    .setParameter("clientId", clientId)
+                    .setParameter("start", start)
+                    .setParameter("end", end)
+                    .getResultList();
+        } catch (PersistenceException e) {
+            throw new DaoException("Error during fetching income by category", e);
         }
     }
 
+    @Transactional
     public void addTransaction(int senderAccountId, int receiverAccountId, int clientId, BigDecimal amount, List<Integer> categoryIds) {
-        Connection connection = null;
         try {
-            connection = dataSource.getConnection();
-            connection.setAutoCommit(false);
+            checkBalanceSufficiency(senderAccountId, clientId, amount);
 
-            isSenderHasSufficientBalance(senderAccountId, clientId, amount, connection);
+            subtractMoneyFromSender(senderAccountId, clientId, amount);
 
-            subtractMoneyFromSender(senderAccountId, clientId, amount, connection);
+            addMoneyToReceiver(receiverAccountId, amount);
 
-            addMoneyToReceiver(receiverAccountId, amount, connection);
-
-            PreparedStatement insertTransactionStatement = getInsertTransactionStatement(senderAccountId, receiverAccountId, amount, connection);
-
-            insertCategoriesIntoTransactionToCategoryTable(categoryIds, insertTransactionStatement, connection);
-            connection.commit();
-        } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException rollbackException) {
-                    throw new DaoException("Failed to rollback transaction.", rollbackException);
-                }
-            }
-            throw new OperationFailedException("Error occurred during transaction.", e);
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.setAutoCommit(true);
-                    connection.close();
-                } catch (SQLException closeException) {
-                    throw new DaoException("Failed to close connection.", closeException);
-                }
-            }
+            createTransaction(senderAccountId, receiverAccountId, amount, categoryIds);
+        } catch (PersistenceException e) {
+            throw new OperationFailedException("Error occurred during adding new transaction", e);
         }
     }
 
-    private static void insertCategoriesIntoTransactionToCategoryTable(List<Integer> categoryIds, PreparedStatement insertTransactionStatement, Connection connection) {
-        int transactionId = getGeneratedTransactionId(insertTransactionStatement);
+    public void createTransaction(int senderAccountId, int receiverAccountId, BigDecimal amount, List<Integer> categoryIds) {
         try {
-            for (int categoryId : categoryIds) {
-                PreparedStatement insertCategoryStatement = connection.prepareStatement(
-                        "insert into transaction_to_category (transaction_id, category_id) values (?,?)"
-                );
-                insertCategoryStatement.setInt(1, transactionId);
-                insertCategoryStatement.setInt(2, categoryId);
-                insertCategoryStatement.executeUpdate();
-            }
-        } catch (SQLException e) {
-            throw new DaoException("Error occurred while inserting data to TransactionToCategoryTable", e);
+            AccountModel senderAccount = getSenderAccount(senderAccountId);
+            AccountModel receiverAccount = getReceiverAccount(receiverAccountId);
+            List<TransactionCategoryModel> categoryModels = getTransactionCategoryModels(categoryIds);
+            TransactionModel transactionModel = buildTransaction(amount, receiverAccount, senderAccount, categoryModels);
+
+            em.persist(transactionModel);
+        } catch (PersistenceException e) {
+            throw new DaoException("Error occurred while creating new transaction", e);
         }
     }
 
-    private static PreparedStatement getInsertTransactionStatement(int senderAccountId, int receiverAccountId, BigDecimal amount, Connection connection) {
-        int affectedRows;
-        try {
-            PreparedStatement insertTransactionStatement = connection.prepareStatement(
-                    "insert into transaction (created_date, amount, sender_account_id, receiver_account_id) values (CURRENT_TIMESTAMP, ?, ?, ?)",
-                    RETURN_GENERATED_KEYS
-            );
-            insertTransactionStatement.setBigDecimal(1, amount);
-            insertTransactionStatement.setInt(2, senderAccountId);
-            insertTransactionStatement.setInt(3, receiverAccountId);
-            affectedRows = insertTransactionStatement.executeUpdate();
-            if (affectedRows != 1) {
-                throw new DaoException("Failed to insert transaction record.");
+    private AccountModel getReceiverAccount(int receiverAccountId) {
+        AccountModel receiverAccount = em.find(AccountModel.class, receiverAccountId);
+        if (receiverAccount == null) {
+            throw new DaoException("Receiver account with id " + receiverAccountId + " does not exist.");
+        }
+        return receiverAccount;
+    }
+
+    private AccountModel getSenderAccount(int senderAccountId) {
+        AccountModel senderAccount = em.find(AccountModel.class, senderAccountId);
+        if (senderAccount == null) {
+            throw new DaoException("Sender account with id " + senderAccountId + " does not exist.");
+        }
+        return senderAccount;
+    }
+
+    private List<TransactionCategoryModel> getTransactionCategoryModels(List<Integer> categoryIds) {
+        List<TransactionCategoryModel> categoryModels = new ArrayList<>();
+        for (Integer categoryId : categoryIds) {
+            TransactionCategoryModel transactionCategoryModel = em.find(TransactionCategoryModel.class, categoryId);
+            if (transactionCategoryModel == null) {
+                throw new DaoException("Category with id " + categoryId + " does not exist.");
             }
-            return insertTransactionStatement;
-        } catch (SQLException e) {
-            throw new DaoException("Error occurred while inserting transaction", e);
+            categoryModels.add(transactionCategoryModel);
+        }
+        return categoryModels;
+    }
+
+    private static TransactionModel buildTransaction(BigDecimal amount, AccountModel receiverAccount, AccountModel senderAccount, List<TransactionCategoryModel> categoryModels) {
+        TransactionModel transactionModel = new TransactionModel();
+        transactionModel.setAmount(amount);
+        transactionModel.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+        transactionModel.setReceiver(receiverAccount);
+        transactionModel.setSender(senderAccount);
+        transactionModel.setCategories(categoryModels);
+        return transactionModel;
+    }
+
+    public void addMoneyToReceiver(int receiverAccountId, BigDecimal amount) {
+        try {
+            AccountModel receiverAccount = em.find(AccountModel.class, receiverAccountId);
+
+            if (receiverAccount == null) {
+                throw new NotFoundException("There is no such account with id " + receiverAccountId);
+            }
+
+            receiverAccount.setBalance(receiverAccount.getBalance().add(amount));
+        } catch (PersistenceException e) {
+            throw new DaoException("Error occurred while adding money to the receiver's account with id " + receiverAccountId, e);
         }
     }
 
-    private static int getGeneratedTransactionId(PreparedStatement insertTransactionStatement) {
+    public void subtractMoneyFromSender(int senderAccountId, int clientId, BigDecimal amount) {
         try {
-            ResultSet generatedKey = insertTransactionStatement.getGeneratedKeys();
-            int transactionId;
-            if (generatedKey.next()) {
-                transactionId = generatedKey.getInt(1);
-            } else {
-                throw new DaoException("Failed to obtain transaction ID.");
-            }
-            return transactionId;
-        } catch (SQLException e) {
-            throw new DaoException("Error occurred while retrieving transaction ID", e);
+            AccountModel senderAccount = em.find(AccountModel.class, senderAccountId);
+
+            accountInformationValidation(senderAccountId, clientId, senderAccount);
+
+            BigDecimal newBalance = senderAccount.getBalance().subtract(amount);
+            senderAccount.setBalance(newBalance);
+        } catch (PersistenceException e) {
+            throw new DaoException("Error occurred while subtracting money from sender's account with id " + senderAccountId, e);
         }
     }
 
-    private void addMoneyToReceiver(int receiverAccountId, BigDecimal amount, Connection connection) {
+    private void checkBalanceSufficiency(int senderAccountId, int clientId, BigDecimal amount) {
         try {
-            PreparedStatement addToReceiverBalanceStatement = connection.prepareStatement(
-                    "update account set balance = balance + ? where id = ?"
-            );
-            addToReceiverBalanceStatement.setBigDecimal(1, amount);
-            addToReceiverBalanceStatement.setInt(2, receiverAccountId);
-            int affectedRows = addToReceiverBalanceStatement.executeUpdate();
-            if (affectedRows != 1) {
-                throw new AddingTheAmountException("Failed to update receiver's account balance.");
+            AccountModel senderAccount = em.find(AccountModel.class, senderAccountId);
+
+            accountInformationValidation(senderAccountId, clientId, senderAccount);
+
+            if (senderAccount.getBalance().compareTo(amount) < 0) {
+                throw new IllegalArgumentException("Insufficient funds in sender's account with id " + senderAccountId);
             }
-        } catch (SQLException e) {
-            throw new DaoException("Error occurred while adding money to receiver's account", e);
-        }
-    }
-
-    private void subtractMoneyFromSender(int senderAccountId, int clientId, BigDecimal amount, Connection connection) {
-        try {
-            PreparedStatement subtractFromSenderBalanceStatement = connection.prepareStatement(
-                    "update account set balance = balance - ?  where id = ? and client_id = ?"
-            );
-            subtractFromSenderBalanceStatement.setBigDecimal(1, amount);
-            subtractFromSenderBalanceStatement.setInt(2, senderAccountId);
-            subtractFromSenderBalanceStatement.setInt(3, clientId);
-
-            int affectedRows = subtractFromSenderBalanceStatement.executeUpdate();
-            if (affectedRows != 1) {
-                throw new SubtractingTheAmountException("Failed to update sender's account balance.");
-            }
-        } catch (SQLException e) {
-            throw new DaoException("Error occurred while updating sender's account balance", e);
-        }
-    }
-
-    private void isSenderHasSufficientBalance(int senderAccountId, int clientId, BigDecimal amount, Connection connection) {
-        try {
-            PreparedStatement checkBalanceStatement = connection.prepareStatement(
-                    "select balance from account where id = ? and client_id = ?"
-            );
-            checkBalanceStatement.setInt(1, senderAccountId);
-            checkBalanceStatement.setInt(2, clientId);
-            ResultSet balanceResultSet = checkBalanceStatement.executeQuery();
-
-            if (!balanceResultSet.next()) {
-                throw new ForbiddenException("Account does not belong to the user.");
-            }
-
-            if (balanceResultSet.getBigDecimal("balance").compareTo(amount) < 0) {
-                throw new IllegalArgumentException("Insufficient funds in sender's account.");
-            }
-        } catch (SQLException e) {
+        } catch (PersistenceException e) {
             throw new DaoException("Error occurred while checking sender's account balance", e);
+        }
+    }
+
+    private static void accountInformationValidation(int senderAccountId, int clientId, AccountModel senderAccount) {
+        if (senderAccount == null) {
+            throw new NotFoundException("There is no account with id " + senderAccountId);
+        }
+
+        if (senderAccount.getClientId() != clientId) {
+            throw new ForbiddenException("Account does not belong to the user with id " + clientId);
         }
     }
 }

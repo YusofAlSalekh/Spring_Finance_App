@@ -1,4 +1,4 @@
-package ru.yusof.dao;
+package ru.yusof.entity;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -6,6 +6,9 @@ import java.util.Objects;
 public class CategoryAmountModel {
     private String categoryName;
     private BigDecimal totalAmount;
+
+    public CategoryAmountModel() {
+    }
 
     public String getCategoryName() {
         return categoryName;
@@ -42,5 +45,10 @@ public class CategoryAmountModel {
     @Override
     public int hashCode() {
         return Objects.hash(categoryName, totalAmount);
+    }
+
+    public CategoryAmountModel(String categoryName, BigDecimal totalAmount) {
+        this.categoryName = categoryName;
+        this.totalAmount = totalAmount;
     }
 }

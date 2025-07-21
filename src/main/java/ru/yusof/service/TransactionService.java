@@ -2,9 +2,9 @@ package ru.yusof.service;
 
 import org.springframework.stereotype.Service;
 import ru.yusof.converter.Converter;
-import ru.yusof.dao.CategoryAmountModel;
 import ru.yusof.dao.TransactionDao;
-import ru.yusof.dao.TransactionModel;
+import ru.yusof.entity.CategoryAmountModel;
+import ru.yusof.entity.TransactionModel;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
