@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yusof.entity.UserModel;
 import ru.yusof.exceptions.AlreadyExistsException;
 
@@ -28,6 +29,7 @@ class UserDaoTest {
     }
 
     @Test
+    @Transactional
     void findByEmailAndHash() {
         Optional<UserModel> user = subj.findByEmailAndHash("yusof@mail.ru", "202cb962ac59075b964b07152d234b70");
 

@@ -1,11 +1,14 @@
 package ru.yusof.entity;
 
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+@NoArgsConstructor
 @Entity
 @Table(name = "transaction")
 public class TransactionModel {
@@ -14,16 +17,16 @@ public class TransactionModel {
     private Integer id;
 
     @Column(name = "created_date")
-    private Timestamp createdDate;
+    private LocalDateTime createdDate;
 
     @Column(name = "amount")
     private BigDecimal amount;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn
     private AccountModel sender;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn
     private AccountModel receiver;
 
@@ -33,27 +36,16 @@ public class TransactionModel {
             inverseJoinColumns = @JoinColumn(name = "category_id"))
     private List<TransactionCategoryModel> categories;
 
-    public TransactionModel() {
-    }
-
-    public TransactionModel(Integer id, Timestamp createdDate, BigDecimal amount, AccountModel sender, AccountModel receiver) {
-        this.id = id;
-        this.createdDate = createdDate;
-        this.amount = amount;
-        this.sender = sender;
-        this.receiver = receiver;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         TransactionModel that = (TransactionModel) o;
-        return Objects.equals(id, that.id) && Objects.equals(createdDate, that.createdDate) && Objects.equals(amount, that.amount) && Objects.equals(sender, that.sender) && Objects.equals(receiver, that.receiver);
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, createdDate, amount, sender, receiver);
+        return Objects.hashCode(id);
     }
 
     @Override
@@ -75,11 +67,11 @@ public class TransactionModel {
         this.id = id;
     }
 
-    public Timestamp getCreatedDate() {
+    public LocalDateTime getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(Timestamp createdDate) {
+    public void setCreatedDate(LocalDateTime createdDate) {
         this.createdDate = createdDate;
     }
 

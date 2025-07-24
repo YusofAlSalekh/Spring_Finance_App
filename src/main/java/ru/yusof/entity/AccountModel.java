@@ -6,9 +6,6 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "account")
-@NamedQueries({
-        @NamedQuery(name = "Account.getAccount", query = "SELECT a FROM AccountModel a WHERE a.clientId = :clientId"),
-        @NamedQuery(name = "Account.changeName", query = "select count (a) from AccountModel a where a.name = :name and a.id<>:id and a.clientId =:clientId")})
 public class AccountModel {
 
     @Id
@@ -58,7 +55,6 @@ public class AccountModel {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AccountModel that = (AccountModel) o;
         return id == that.id;
@@ -66,6 +62,6 @@ public class AccountModel {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hashCode(id);
     }
 }

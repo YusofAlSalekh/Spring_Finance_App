@@ -47,7 +47,7 @@ public class UserModel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserModel userModel = (UserModel) o;
-        return id == userModel.id;
+        return Objects.equals(id, userModel.id);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package ru.yusof.dao;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yusof.entity.TransactionCategoryModel;
 import ru.yusof.exceptions.AlreadyExistsException;
 import ru.yusof.exceptions.DaoException;
@@ -9,7 +10,6 @@ import ru.yusof.exceptions.NotFoundException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
-import javax.transaction.Transactional;
 import java.util.List;
 
 @Service

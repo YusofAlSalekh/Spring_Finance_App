@@ -48,14 +48,6 @@ public class MainServlet extends HttpServlet {
         res.setContentType("application/json");
         handleRequest(req, res);
     }
- /* @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-          throws ServletException, IOException {
-
-      resp.setContentType("text/html");
-      PrintWriter out = resp.getWriter();
-      out.println("<h1>MainServlet is working!</h1>");
-  }*/
 
     private void handleRequest(HttpServletRequest req, HttpServletResponse res) throws IOException {
 

@@ -1,14 +1,14 @@
 package ru.yusof.entity;
 
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.util.Objects;
 
+@NoArgsConstructor
 public class CategoryAmountModel {
     private String categoryName;
     private BigDecimal totalAmount;
-
-    public CategoryAmountModel() {
-    }
 
     public String getCategoryName() {
         return categoryName;

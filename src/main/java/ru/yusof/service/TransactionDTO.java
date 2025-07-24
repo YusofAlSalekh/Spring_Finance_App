@@ -1,11 +1,11 @@
 package ru.yusof.service;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 public class TransactionDTO {
     private int id;
-    private Timestamp createdDate;
+    private LocalDateTime createdDate;
     private BigDecimal amount;
     private int senderAccountId;
     private int receiverAccountId;
@@ -18,11 +18,11 @@ public class TransactionDTO {
         this.id = id;
     }
 
-    public Timestamp getCreatedDate() {
+    public LocalDateTime getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(Timestamp createdDate) {
+    public void setCreatedDate(LocalDateTime createdDate) {
         this.createdDate = createdDate;
     }
 

@@ -1,22 +1,22 @@
 package ru.yusof.dao;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yusof.entity.AccountModel;
 import ru.yusof.entity.CategoryAmountModel;
 import ru.yusof.entity.TransactionCategoryModel;
 import ru.yusof.entity.TransactionModel;
 import ru.yusof.exceptions.DaoException;
-import ru.yusof.exceptions.ForbiddenException;
 import ru.yusof.exceptions.NotFoundException;
 import ru.yusof.exceptions.OperationFailedException;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
-import javax.transaction.Transactional;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,8 +27,6 @@ public class TransactionDao {
 
     public List<CategoryAmountModel> fetchExpenseByCategory(int clientId, LocalDate startDate, LocalDate endDate) {
         try {
-            Timestamp start = Timestamp.valueOf(startDate.atStartOfDay());
-            Timestamp end = Timestamp.valueOf(endDate.plusDays(1).atStartOfDay());
             return em.createQuery("select new ru.yusof.entity.CategoryAmountModel(c.name, sum(t.amount)) " +
                                     "from TransactionModel t " +
                                     "join t.categories c " +
@@ -38,8 +36,8 @@ public class TransactionDao {
                             CategoryAmountModel.class
                     )
                     .setParameter("clientId", clientId)
-                    .setParameter("start", start)
-                    .setParameter("end", end)
+                    .setParameter("start", startDate.atStartOfDay())
+                    .setParameter("end", endDate.plusDays(1).atStartOfDay())
                     .getResultList();
         } catch (PersistenceException e) {
             throw new DaoException("Error during fetching expenses by category", e);
@@ -48,8 +46,6 @@ public class TransactionDao {
 
     public List<CategoryAmountModel> fetchIncomeByCategory(int clientId, LocalDate startDate, LocalDate endDate) {
         try {
-            Timestamp start = Timestamp.valueOf(startDate.atStartOfDay());
-            Timestamp end = Timestamp.valueOf(endDate.plusDays(1).atStartOfDay());
             return em.createQuery("select new ru.yusof.entity.CategoryAmountModel(c.name, sum(t.amount)) " +
                                     "from TransactionModel t " +
                                     "join t.receiver s " +
@@ -58,8 +54,8 @@ public class TransactionDao {
                                     "group by c.name",
                             CategoryAmountModel.class)
                     .setParameter("clientId", clientId)
-                    .setParameter("start", start)
-                    .setParameter("end", end)
+                    .setParameter("start", startDate.atStartOfDay())
+                    .setParameter("end", endDate.plusDays(1).atStartOfDay())
                     .getResultList();
         } catch (PersistenceException e) {
             throw new DaoException("Error during fetching income by category", e);
@@ -125,7 +121,7 @@ public class TransactionDao {
     private static TransactionModel buildTransaction(BigDecimal amount, AccountModel receiverAccount, AccountModel senderAccount, List<TransactionCategoryModel> categoryModels) {
         TransactionModel transactionModel = new TransactionModel();
         transactionModel.setAmount(amount);
-        transactionModel.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+        transactionModel.setCreatedDate(LocalDateTime.now());
         transactionModel.setReceiver(receiverAccount);
         transactionModel.setSender(senderAccount);
         transactionModel.setCategories(categoryModels);
@@ -148,9 +144,7 @@ public class TransactionDao {
 
     public void subtractMoneyFromSender(int senderAccountId, int clientId, BigDecimal amount) {
         try {
-            AccountModel senderAccount = em.find(AccountModel.class, senderAccountId);
-
-            accountInformationValidation(senderAccountId, clientId, senderAccount);
+            AccountModel senderAccount = findAccountByIds(senderAccountId, clientId);
 
             BigDecimal newBalance = senderAccount.getBalance().subtract(amount);
             senderAccount.setBalance(newBalance);
@@ -161,9 +155,7 @@ public class TransactionDao {
 
     private void checkBalanceSufficiency(int senderAccountId, int clientId, BigDecimal amount) {
         try {
-            AccountModel senderAccount = em.find(AccountModel.class, senderAccountId);
-
-            accountInformationValidation(senderAccountId, clientId, senderAccount);
+            AccountModel senderAccount = findAccountByIds(senderAccountId, clientId);
 
             if (senderAccount.getBalance().compareTo(amount) < 0) {
                 throw new IllegalArgumentException("Insufficient funds in sender's account with id " + senderAccountId);
@@ -173,13 +165,16 @@ public class TransactionDao {
         }
     }
 
-    private static void accountInformationValidation(int senderAccountId, int clientId, AccountModel senderAccount) {
-        if (senderAccount == null) {
-            throw new NotFoundException("There is no account with id " + senderAccountId);
-        }
-
-        if (senderAccount.getClientId() != clientId) {
-            throw new ForbiddenException("Account does not belong to the user with id " + clientId);
+    private AccountModel findAccountByIds(Integer senderAccountId, Integer clientId) {
+        try {
+            return em.createQuery(
+                            "select ac from AccountModel ac where ac.id = :accountId and ac.clientId = :clientId",
+                            AccountModel.class)
+                    .setParameter("accountId", senderAccountId)
+                    .setParameter("clientId", clientId)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            throw new NotFoundException("There is no account with id " + senderAccountId + " for client " + clientId);
         }
     }
 }

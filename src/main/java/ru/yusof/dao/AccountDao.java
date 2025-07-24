@@ -1,6 +1,7 @@
 package ru.yusof.dao;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yusof.entity.AccountModel;
 import ru.yusof.exceptions.AlreadyExistsException;
 import ru.yusof.exceptions.DaoException;
@@ -9,7 +10,6 @@ import ru.yusof.exceptions.NotFoundException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
-import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class AccountDao {
 
     public List<AccountModel> findByClientID(int clientId) {
         try {
-            return em.createNamedQuery("Account.getAccount", AccountModel.class)
+            return em.createQuery("select a from AccountModel a where a.clientId = :clientId", AccountModel.class)
                     .setParameter("clientId", clientId)
                     .getResultList();
         } catch (PersistenceException e) {
@@ -58,7 +58,7 @@ public class AccountDao {
     @Transactional
     public AccountModel updateAccountName(String accountName, int accountId, int clientId) {
         try {
-            Long count = em.createNamedQuery("Account.changeName", Long.class)
+            Long count = em.createQuery("select count (a) from AccountModel a where a.name = :name and a.id<>:id and a.clientId =:clientId", Long.class)
                     .setParameter("name", accountName)
                     .setParameter("id", accountId)
                     .setParameter("clientId", clientId)
