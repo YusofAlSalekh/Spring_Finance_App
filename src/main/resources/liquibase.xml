@@ -64,10 +64,10 @@
             <column name="amount" type="DECIMAL(10, 2)">
                 <constraints nullable="false"/>
             </column>
-            <column name="sender_account_id" type="INT">
+            <column name="sender_id" type="INT">
                 <constraints nullable="false" foreignKeyName="fk_transaction_sender_account" references="account(id)"/>
             </column>
-            <column name="receiver_account_id" type="INT">
+            <column name="receiver_id" type="INT">
                 <constraints nullable="false" foreignKeyName="fk_transaction_receiver_account" references="account(id)"/>
             </column>
         </createTable>

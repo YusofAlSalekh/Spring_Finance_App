@@ -2,7 +2,7 @@ package ru.yusof.view;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import ru.yusof.dao.CategoryAmountModel;
+import ru.yusof.entity.CategoryAmountModel;
 import ru.yusof.service.*;
 
 import java.math.BigDecimal;

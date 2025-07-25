@@ -1,7 +1,7 @@
 package ru.yusof.converter;
 
 import org.springframework.stereotype.Service;
-import ru.yusof.dao.TransactionModel;
+import ru.yusof.entity.TransactionModel;
 import ru.yusof.service.TransactionDTO;
 
 @Service
@@ -13,8 +13,8 @@ public class TransactionModelToTransactionDtoConverter<S, T> implements Converte
         transactionDTO.setId(source.getId());
         transactionDTO.setCreatedDate(source.getCreatedDate());
         transactionDTO.setAmount(source.getAmount());
-        transactionDTO.setSenderAccountId(source.getSenderAccountId());
-        transactionDTO.setReceiverAccountId(source.getReceiverAccountId());
+        transactionDTO.setSenderAccountId(source.getSender().getId());
+        transactionDTO.setReceiverAccountId(source.getReceiver().getId());
 
         return transactionDTO;
     }

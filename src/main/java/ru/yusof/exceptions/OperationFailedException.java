@@ -3,7 +3,7 @@ package ru.yusof.exceptions;
 import java.sql.SQLException;
 
 public class OperationFailedException extends RuntimeException {
-    public OperationFailedException(String message, SQLException e) {
+    public OperationFailedException(String message, Exception e) {
         super(message);
     }
 

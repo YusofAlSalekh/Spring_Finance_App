@@ -1,12 +1,24 @@
-package ru.yusof.dao;
+package ru.yusof.entity;
 
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+@Entity
+@Table(name = "account")
 public class AccountModel {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Column(name = "name")
     private String name;
+
+    @Column(name = "balance")
     private BigDecimal balance;
+
+    @Column(name = "client_id")
     private int clientId;
 
     public int getId() {
@@ -43,7 +55,6 @@ public class AccountModel {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AccountModel that = (AccountModel) o;
         return id == that.id;
@@ -51,6 +62,6 @@ public class AccountModel {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hashCode(id);
     }
 }

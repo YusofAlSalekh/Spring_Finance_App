@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.yusof.converter.TransactionCategoryModelToTransactionCategoryDtoConverter;
 import ru.yusof.dao.TransactionCategoryDao;
-import ru.yusof.dao.TransactionCategoryModel;
+import ru.yusof.entity.TransactionCategoryModel;
 import ru.yusof.exceptions.AddingTransactionCategoryException;
 import ru.yusof.exceptions.CreatingTransactionCategoryException;
 import ru.yusof.exceptions.DeletionTransactionCategoryException;
@@ -79,19 +79,19 @@ class TransactionCategoryServiceTest {
 
     @Test
     void transactionTypeWasEdited() {
-        when(transactionCategoryDao.editTransactionCategory("name", 1, 1)).thenReturn(true);
+        when(transactionCategoryDao.updateTransactionCategoryName("name", 1, 1)).thenReturn(true);
 
         assertTrue(subj.editTransactionCategory("name", 1, 1));
 
-        verify(transactionCategoryDao, times(1)).editTransactionCategory("name", 1, 1);
+        verify(transactionCategoryDao, times(1)).updateTransactionCategoryName("name", 1, 1);
     }
 
     @Test
     void transactionTypeWasNotEdited() {
-        when(transactionCategoryDao.editTransactionCategory("name", 1, 1)).thenThrow(new AddingTransactionCategoryException("Something went wrong during editing. Please, try again later!"));
+        when(transactionCategoryDao.updateTransactionCategoryName("name", 1, 1)).thenThrow(new AddingTransactionCategoryException("Something went wrong during editing. Please, try again later!"));
 
         assertThrows(AddingTransactionCategoryException.class, () -> subj.editTransactionCategory("name", 1, 1), "Something went wrong. Please, try to delete again later!");
 
-        verify(transactionCategoryDao, times(1)).editTransactionCategory("name", 1, 1);
+        verify(transactionCategoryDao, times(1)).updateTransactionCategoryName("name", 1, 1);
     }
 }

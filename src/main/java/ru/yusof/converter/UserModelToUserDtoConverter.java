@@ -1,7 +1,7 @@
 package ru.yusof.converter;
 
 import org.springframework.stereotype.Service;
-import ru.yusof.dao.UserModel;
+import ru.yusof.entity.UserModel;
 import ru.yusof.service.UserDTO;
 
 @Service

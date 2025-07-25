@@ -5,8 +5,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.yusof.dao.CategoryAmountModel;
 import ru.yusof.dao.TransactionDao;
+import ru.yusof.entity.CategoryAmountModel;
 import ru.yusof.exceptions.GetExpenseByCategoryException;
 import ru.yusof.exceptions.GetIncomeByCategoryException;
 

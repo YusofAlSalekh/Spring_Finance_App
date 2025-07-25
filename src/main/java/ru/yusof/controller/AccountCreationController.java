@@ -19,10 +19,13 @@ public class AccountCreationController implements SecureController<AccountCreati
 
     @Override
     public AccountCreationResponse handle(AccountCreationRequest request, Integer userId) {
-        String name = validateNotBlankString(request.getName());
-        BigDecimal balance = validatePositiveBigDecimal(request.getBalance());
-        AccountDTO accountDTO = accountService.createAccount(name, balance, userId);
+        validateNotBlankString(request.getName());
+        String name = request.getName();
 
+        validatePositiveBigDecimal(request.getBalance());
+        BigDecimal balance = request.getBalance();
+
+        AccountDTO accountDTO = accountService.createAccount(name, balance, userId);
         return new AccountCreationResponse(accountDTO);
     }
 

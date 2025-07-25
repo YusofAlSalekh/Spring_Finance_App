@@ -16,7 +16,8 @@ public class TransactionCategoryCreationController implements SecureController<T
 
     @Override
     public TransactionCategoryCreationResponse handle(TransactionCategoryCreationRequest request, Integer userId) {
-        String categoryName = validateNotBlankString(request.getName());
+        validateNotBlankString(request.getName());
+        String categoryName = request.getName();
 
         TransactionCategoryDTO transactionCategory = transactionCategoryService.createCategory(categoryName, userId);
         return new TransactionCategoryCreationResponse(transactionCategory);
