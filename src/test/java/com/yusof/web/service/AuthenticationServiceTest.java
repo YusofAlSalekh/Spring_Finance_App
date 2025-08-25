@@ -21,8 +21,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class AuthorizationServiceTest {
-    @InjectMocks AuthorizationService subject;
+class AuthenticationServiceTest {
+    @InjectMocks
+    AuthenticationService subject;
 
     @Mock
     ClientRepository clientRepository;

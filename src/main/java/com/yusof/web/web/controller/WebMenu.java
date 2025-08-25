@@ -11,12 +11,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-import static com.yusof.web.api.controller.SessionUtils.getClientId;
-
 @RequiredArgsConstructor
 @Controller
-public class WebMenu {
-    private final AuthorizationService authorizationService;
+public class WebMenu extends AbstractWebController {
+    private final AuthenticationService authenticationService;
     private final AccountService accountService;
     private final TransactionCategoryService transactionCategoryService;
 
@@ -27,7 +25,7 @@ public class WebMenu {
         try {
             Integer clientId = getClientId(request);
 
-            ClientDTO client = authorizationService.getClientById(clientId);
+            ClientDTO client = authenticationService.getClientById(clientId);
 
             model.addAttribute("id", client.getId())
                     .addAttribute("name", client.getEmail());

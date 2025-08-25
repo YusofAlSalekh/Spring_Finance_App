@@ -15,15 +15,15 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
-import static com.yusof.web.api.controller.SessionUtils.getClientId;
-
 @Controller
 @RequiredArgsConstructor
-public class WebTransactionCreation {
+@RequestMapping("/transaction")
+public class WebTransactionController extends AbstractWebController {
     private final TransactionService transactionService;
     private final TransactionCategoryService transactionCategoryService;
 
@@ -33,13 +33,13 @@ public class WebTransactionCreation {
         return transactionCategoryService.viewTransactionCategory(clientId);
     }
 
-    @GetMapping("/transaction/create")
+    @GetMapping("/create")
     public String getTransactionCreation(Model model) {
         model.addAttribute("form", new TransactionCreationForm());
         return "transactionCreation";
     }
 
-    @PostMapping("/transaction/create")
+    @PostMapping("/create")
     public String postTransactionCreation(@ModelAttribute("form") @Valid TransactionCreationForm form,
                                           BindingResult bindingResult,
                                           HttpServletRequest request,

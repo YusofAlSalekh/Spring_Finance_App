@@ -10,7 +10,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
-public class CategoryAmountModel {
+public class CategoryReportModel {
     private String categoryName;
     private BigDecimal totalAmount;
 
@@ -26,7 +26,7 @@ public class CategoryAmountModel {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        CategoryAmountModel that = (CategoryAmountModel) o;
+        CategoryReportModel that = (CategoryReportModel) o;
         return Objects.equals(categoryName, that.categoryName) && Objects.equals(totalAmount, that.totalAmount);
     }
 
@@ -35,7 +35,7 @@ public class CategoryAmountModel {
         return Objects.hash(categoryName, totalAmount);
     }
 
-    public CategoryAmountModel(String categoryName, BigDecimal totalAmount) {
+    public CategoryReportModel(String categoryName, BigDecimal totalAmount) {
         this.categoryName = categoryName;
         this.totalAmount = totalAmount;
     }

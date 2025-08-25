@@ -2,9 +2,7 @@ package com.yusof.web.service;
 
 import com.yusof.web.entity.TransactionCategoryModel;
 import com.yusof.web.exceptions.AlreadyExistsException;
-import com.yusof.web.exceptions.IllegalOwnerException;
 import com.yusof.web.exceptions.NotFoundException;
-import com.yusof.web.exceptions.OperationFailedException;
 import com.yusof.web.repository.TransactionCategoryRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,8 +67,7 @@ class TransactionCategoryServiceTest {
         model.setId(id);
         model.setClientId(clientId);
 
-        when(transactionCategoryRepository.findById(id)).thenReturn(Optional.of(model));
-        when(transactionCategoryRepository.deleteByIdAndClientId(id, clientId)).thenReturn(1);
+        when(transactionCategoryRepository.findByIdAndClientId(id, clientId)).thenReturn(Optional.of(model));
 
         assertDoesNotThrow(() -> subject.deleteTransactionCategory(id, clientId));
 
@@ -81,44 +78,12 @@ class TransactionCategoryServiceTest {
     void deleteTransactionCategory_categoryNotFound_throwsException() {
         int id = 1;
         int clientId = 1;
-        when(transactionCategoryRepository.findById(id)).thenReturn(Optional.empty());
+        when(transactionCategoryRepository.findByIdAndClientId(id, clientId)).thenReturn(Optional.empty());
 
         assertThrowsExactly(NotFoundException.class,
                 () -> subject.deleteTransactionCategory(id, clientId));
 
         verify(transactionCategoryRepository, never()).deleteByIdAndClientId(id, clientId);
-    }
-
-    @Test
-    void deleteTransactionCategory_wrongOwner_throwsIllegalOwnerException() {
-        int id = 1;
-        TransactionCategoryModel model = new TransactionCategoryModel();
-        model.setId(id);
-        model.setClientId(1);
-
-        when(transactionCategoryRepository.findById(id)).thenReturn(Optional.of(model));
-
-        assertThrowsExactly(IllegalOwnerException.class,
-                () -> subject.deleteTransactionCategory(id, 2));
-
-        verify(transactionCategoryRepository, never()).deleteByIdAndClientId(id, 2);
-    }
-
-    @Test
-    void deleteTransactionCategory_deletionFailed_throwsOperationFailedException() {
-        int id = 1;
-        int clientId = 1;
-        TransactionCategoryModel model = new TransactionCategoryModel();
-        model.setId(id);
-        model.setClientId(clientId);
-
-        when(transactionCategoryRepository.findById(id)).thenReturn(Optional.of(model));
-        when(transactionCategoryRepository.deleteByIdAndClientId(id, clientId)).thenReturn(0);
-
-        assertThrowsExactly(OperationFailedException.class,
-                () -> subject.deleteTransactionCategory(id, clientId));
-
-        verify(transactionCategoryRepository).deleteByIdAndClientId(id, clientId);
     }
 
     @Test
@@ -134,7 +99,7 @@ class TransactionCategoryServiceTest {
         TransactionCategoryDTO dto = new TransactionCategoryDTO();
 
         when(transactionCategoryRepository.countByNameAndClientIdAndIdNot(newName, clientId, id)).thenReturn(0);
-        when(transactionCategoryRepository.findById(id)).thenReturn(Optional.of(model));
+        when(transactionCategoryRepository.findByIdAndClientId(id, clientId)).thenReturn(Optional.of(model));
         when(transactionCategoryDTOConverter.convert(model)).thenReturn(dto);
 
         TransactionCategoryDTO result = subject.updateTransactionCategory(newName, id, clientId);

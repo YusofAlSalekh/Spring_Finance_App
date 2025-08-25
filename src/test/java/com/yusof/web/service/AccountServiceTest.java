@@ -2,9 +2,7 @@ package com.yusof.web.service;
 
 import com.yusof.web.entity.AccountModel;
 import com.yusof.web.exceptions.AlreadyExistsException;
-import com.yusof.web.exceptions.IllegalOwnerException;
 import com.yusof.web.exceptions.NotFoundException;
-import com.yusof.web.exceptions.OperationFailedException;
 import com.yusof.web.repository.AccountRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -144,37 +142,11 @@ public class AccountServiceTest {
         accountModel.setId(accountId);
         accountModel.setClientId(clientId);
 
-        when(accountRepository.findById(accountId)).thenReturn(Optional.of(accountModel));
-
-        when(accountRepository.deleteByIdAndClientId(accountId, clientId)).thenReturn(1);
+        when(accountRepository.findByIdAndClientId(accountId, clientId)).thenReturn(Optional.of(accountModel));
 
         assertDoesNotThrow(() -> subject.deleteAccount(accountId, clientId));
 
-        verify(accountRepository).findById(accountId);
-        verify(accountRepository).deleteByIdAndClientId(accountId, clientId);
-        verifyNoMoreInteractions(accountRepository);
-    }
-
-    @Test
-    void deleteAccount_throwsOperationFailedException() {
-        int accountId = 1;
-        int clientId = 1;
-
-        AccountModel model = new AccountModel();
-        model.setId(accountId);
-        model.setClientId(clientId);
-        when(accountRepository.findById(accountId)).thenReturn(Optional.of(model));
-
-        when(accountRepository.deleteByIdAndClientId(accountId, clientId)).thenReturn(0);
-
-        OperationFailedException ex = assertThrowsExactly(
-                OperationFailedException.class,
-                () -> subject.deleteAccount(accountId, clientId)
-        );
-
-        assertTrue(ex.getMessage().contains("Error has occurred while deleting account"));
-
-        verify(accountRepository).findById(accountId);
+        verify(accountRepository).findByIdAndClientId(accountId, clientId);
         verify(accountRepository).deleteByIdAndClientId(accountId, clientId);
         verifyNoMoreInteractions(accountRepository);
     }
@@ -184,30 +156,12 @@ public class AccountServiceTest {
         int accountId = 1;
         int clientId = 1;
 
-        when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
+        when(accountRepository.findByIdAndClientId(accountId, clientId)).thenReturn(Optional.empty());
 
         assertThrowsExactly(NotFoundException.class,
                 () -> subject.deleteAccount(accountId, clientId));
 
-        verify(accountRepository).findById(accountId);
-        verify(accountRepository, never()).deleteByIdAndClientId(anyInt(), anyInt());
-        verifyNoMoreInteractions(accountRepository);
-    }
-
-    @Test
-    void deleteAccount_whenIllegalOwner_throwsIllegalOwnerException() {
-        int accountId = 1;
-        int clientId = 1;
-
-        AccountModel accountModel = new AccountModel();
-        accountModel.setId(accountId);
-        accountModel.setClientId(2);
-        when(accountRepository.findById(accountId)).thenReturn(Optional.of(accountModel));
-
-        assertThrowsExactly(IllegalOwnerException.class,
-                () -> subject.deleteAccount(accountId, clientId));
-
-        verify(accountRepository).findById(accountId);
+        verify(accountRepository).findByIdAndClientId(accountId, clientId);
         verify(accountRepository, never()).deleteByIdAndClientId(anyInt(), anyInt());
         verifyNoMoreInteractions(accountRepository);
     }
@@ -227,7 +181,7 @@ public class AccountServiceTest {
         accountModel.setClientId(clientId);
         accountModel.setName(oldName);
         accountModel.setBalance(balance);
-        when(accountRepository.findById(accountId)).thenReturn(Optional.of(accountModel));
+        when(accountRepository.findByIdAndClientId(accountId, clientId)).thenReturn(Optional.of(accountModel));
 
         AccountDTO expected = new AccountDTO();
         expected.setId(accountId);
@@ -245,7 +199,7 @@ public class AccountServiceTest {
         assertEquals(balance, result.getBalance());
 
         verify(accountRepository).countByNameAndClientIdAndIdNot(newName, clientId, accountId);
-        verify(accountRepository).findById(accountId);
+        verify(accountRepository).findByIdAndClientId(accountId, clientId);
         verify(accountDtoConverter).convert(argThat(m -> m == accountModel && m.getName().equals(newName)));
         verifyNoMoreInteractions(accountRepository, accountDtoConverter);
     }
@@ -277,7 +231,7 @@ public class AccountServiceTest {
         int clientId = 1;
 
         when(accountRepository.countByNameAndClientIdAndIdNot(newName, clientId, accountId)).thenReturn(0);
-        when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
+        when(accountRepository.findByIdAndClientId(accountId, clientId)).thenReturn(Optional.empty());
 
         NotFoundException ex = assertThrowsExactly(
                 NotFoundException.class,
@@ -286,32 +240,7 @@ public class AccountServiceTest {
         assertTrue(ex.getMessage().contains("No account found with Id: " + accountId));
 
         verify(accountRepository).countByNameAndClientIdAndIdNot(newName, clientId, accountId);
-        verify(accountRepository).findById(accountId);
-        verifyNoMoreInteractions(accountRepository);
-        verify(accountDtoConverter, never()).convert(any());
-    }
-
-    @Test
-    void updateAccountName_throwsIllegalOwnerException() {
-        String newName = "NewName";
-        int accountId = 1;
-        int clientId = 1;
-
-        when(accountRepository.countByNameAndClientIdAndIdNot(newName, clientId, accountId)).thenReturn(0);
-
-        AccountModel accountModel = new AccountModel();
-        accountModel.setId(accountId);
-        accountModel.setClientId(2);
-        when(accountRepository.findById(accountId)).thenReturn(Optional.of(accountModel));
-
-        IllegalOwnerException ex = assertThrowsExactly(
-                IllegalOwnerException.class,
-                () -> subject.updateAccountName(newName, accountId, clientId)
-        );
-        assertTrue(ex.getMessage().contains("Account with Id: " + accountId + " belongs to another client"));
-
-        verify(accountRepository).countByNameAndClientIdAndIdNot(newName, clientId, accountId);
-        verify(accountRepository).findById(accountId);
+        verify(accountRepository).findByIdAndClientId(accountId, clientId);
         verifyNoMoreInteractions(accountRepository);
         verify(accountDtoConverter, never()).convert(any());
     }

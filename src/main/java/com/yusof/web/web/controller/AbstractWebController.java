@@ -1,11 +1,11 @@
-package com.yusof.web.api.controller;
+package com.yusof.web.web.controller;
 
 import com.yusof.web.exceptions.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
-public class SessionUtils {
-    public static Integer getClientId(HttpServletRequest httpServletRequest) {
+public abstract class AbstractWebController {
+    protected Integer getClientId(HttpServletRequest httpServletRequest) {
         HttpSession session = httpServletRequest.getSession(false);
         if (session == null || session.getAttribute("clientId") == null) {
             throw new UnauthorizedException("User is not logged in");

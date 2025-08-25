@@ -1,9 +1,13 @@
 package com.yusof.web.web.controller;
 
 import com.yusof.web.exceptions.AlreadyExistsException;
-import com.yusof.web.service.AuthorizationService;
+import com.yusof.web.exceptions.BadCredentialsException;
+import com.yusof.web.service.AuthenticationService;
 import com.yusof.web.service.ClientDTO;
+import com.yusof.web.web.form.AuthorisationForm;
 import com.yusof.web.web.form.RegistrationForm;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -16,8 +20,36 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequiredArgsConstructor
-public class WebRegistrationController {
-    private final AuthorizationService authorizationService;
+public class WebAuthenticationController {
+    private final AuthenticationService authenticationService;
+
+    @GetMapping("/login")
+    public String getAuthorisation(Model model) {
+        model.addAttribute("form", new AuthorisationForm());
+
+        return "authorisation";
+    }
+
+    @PostMapping("/login")
+    public String postAuthorisation(@ModelAttribute("form") @Valid AuthorisationForm form,
+                                    BindingResult bindingResult,
+                                    HttpServletRequest request) {
+
+        if (!bindingResult.hasErrors()) {
+            try {
+                ClientDTO clientDTO = authenticationService.authorize(
+                        form.getEmail(),
+                        form.getPassword());
+
+                HttpSession session = request.getSession();
+                session.setAttribute("clientId", clientDTO.getId());
+                return "redirect:/menu";
+            } catch (BadCredentialsException e) {
+                bindingResult.reject("authorisation.failed", "Email or password is invalid");
+            }
+        }
+        return "authorisation";
+    }
 
     @GetMapping("/register")
     public String getRegistration(Model model) {
@@ -31,7 +63,7 @@ public class WebRegistrationController {
                                    RedirectAttributes redirectAttributes) {
         if (!bindingResult.hasErrors()) {
             try {
-                ClientDTO clientDTO = authorizationService.register(
+                ClientDTO clientDTO = authenticationService.register(
                         form.getLogin(),
                         form.getPassword());
 

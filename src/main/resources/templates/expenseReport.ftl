@@ -13,7 +13,7 @@
     <div class="row">
         <div class="col">
             <h2 class="mb-4">Enter data to see an expense report</h2>
-            <form action="/transaction/expense" method="POST">
+            <form action="/category/report/expense" method="POST">
 
                 <@spring.bind "form"/>
                 <#if spring.status.error>

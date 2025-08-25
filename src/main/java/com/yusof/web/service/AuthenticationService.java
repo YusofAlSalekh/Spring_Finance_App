@@ -16,12 +16,12 @@ import org.springframework.validation.annotation.Validated;
 
 @Service
 @Validated
-public class AuthorizationService {
+public class AuthenticationService {
     private final ClientRepository clientRepository;
     private final Converter<ClientModel, ClientDTO> clientDtoConverter;
     private int clientId;
 
-    public AuthorizationService(ClientRepository clientRepository, Converter<ClientModel, ClientDTO> clientDtoConverter) {
+    public AuthenticationService(ClientRepository clientRepository, Converter<ClientModel, ClientDTO> clientDtoConverter) {
         this.clientRepository = clientRepository;
         this.clientDtoConverter = clientDtoConverter;
     }

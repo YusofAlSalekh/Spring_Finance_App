@@ -2,7 +2,7 @@ package com.yusof.web.service;
 
 import com.yusof.web.api.controller.TransactionCommandCreation;
 import com.yusof.web.entity.AccountModel;
-import com.yusof.web.entity.CategoryAmountModel;
+import com.yusof.web.entity.CategoryReportModel;
 import com.yusof.web.entity.TransactionCategoryModel;
 import com.yusof.web.entity.TransactionModel;
 import com.yusof.web.exceptions.NotFoundException;
@@ -47,7 +47,7 @@ class TransactionServiceTest {
         LocalDate end = LocalDate.of(2024, 1, 31);
         BigDecimal totalAmount = new BigDecimal("100.00");
 
-        List<CategoryAmountModel> expected = List.of(new CategoryAmountModel("Category", totalAmount));
+        List<CategoryReportModel> expected = List.of(new CategoryReportModel("Category", totalAmount));
 
         when(transactionRepository.fetchIncomeByCategory(
                 clientId,
@@ -55,7 +55,7 @@ class TransactionServiceTest {
                 end.plusDays(1).atStartOfDay()
         )).thenReturn(expected);
 
-        List<CategoryAmountModel> result = subject.getIncomeReportByCategory(clientId, start, end);
+        List<CategoryReportModel> result = subject.getIncomeReportByCategory(clientId, start, end);
 
         assertEquals(expected, result);
         verify(transactionRepository).fetchIncomeByCategory(
@@ -72,7 +72,7 @@ class TransactionServiceTest {
         LocalDate end = LocalDate.of(2024, 1, 31);
         BigDecimal totalAmount = new BigDecimal("100.00");
 
-        List<CategoryAmountModel> expected = List.of(new CategoryAmountModel("Category", totalAmount));
+        List<CategoryReportModel> expected = List.of(new CategoryReportModel("Category", totalAmount));
 
         when(transactionRepository.fetchExpenseByCategory(
                 clientId,
@@ -80,7 +80,7 @@ class TransactionServiceTest {
                 end.plusDays(1).atStartOfDay()
         )).thenReturn(expected);
 
-        List<CategoryAmountModel> result = subject.getExpenseReportByCategory(clientId, start, end);
+        List<CategoryReportModel> result = subject.getExpenseReportByCategory(clientId, start, end);
 
         assertEquals(expected, result);
         verify(transactionRepository).fetchExpenseByCategory(
@@ -110,7 +110,7 @@ class TransactionServiceTest {
         TransactionCategoryModel category = new TransactionCategoryModel();
         category.setId(1);
 
-        when(accountRepository.findAccountByIdAndClientId(senderId, clientId))
+        when(accountRepository.findByIdAndClientId(senderId, clientId))
                 .thenReturn(Optional.of(sender));
         when(accountRepository.findById(senderId)).thenReturn(Optional.of(sender));
         when(accountRepository.findById(receiverId)).thenReturn(Optional.of(receiver));
@@ -139,7 +139,7 @@ class TransactionServiceTest {
         sender.setClientId(clientId);
         sender.setBalance(new BigDecimal("50.00"));
 
-        when(accountRepository.findAccountByIdAndClientId(senderId, clientId))
+        when(accountRepository.findByIdAndClientId(senderId, clientId))
                 .thenReturn(Optional.of(sender));
 
         TransactionCommandCreation command =
@@ -161,7 +161,7 @@ class TransactionServiceTest {
         sender.setClientId(clientId);
         sender.setBalance(new BigDecimal("500.00"));
 
-        when(accountRepository.findAccountByIdAndClientId(senderId, clientId))
+        when(accountRepository.findByIdAndClientId(senderId, clientId))
                 .thenReturn(Optional.of(sender));
         when(accountRepository.findById(receiverId))
                 .thenReturn(Optional.empty());
@@ -190,7 +190,7 @@ class TransactionServiceTest {
         receiver.setId(receiverId);
         receiver.setBalance(new BigDecimal("0.00"));
 
-        when(accountRepository.findAccountByIdAndClientId(senderId, clientId))
+        when(accountRepository.findByIdAndClientId(senderId, clientId))
                 .thenReturn(Optional.of(sender));
         when(accountRepository.findById(senderId)).thenReturn(Optional.of(sender));
         when(accountRepository.findById(receiverId)).thenReturn(Optional.of(receiver));

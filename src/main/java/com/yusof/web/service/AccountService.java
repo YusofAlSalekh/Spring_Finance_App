@@ -2,9 +2,7 @@ package com.yusof.web.service;
 
 import com.yusof.web.entity.AccountModel;
 import com.yusof.web.exceptions.AlreadyExistsException;
-import com.yusof.web.exceptions.IllegalOwnerException;
 import com.yusof.web.exceptions.NotFoundException;
-import com.yusof.web.exceptions.OperationFailedException;
 import com.yusof.web.repository.AccountRepository;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -17,8 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -29,61 +27,62 @@ public class AccountService {
 
     public List<AccountDTO> viewAccount(int clientId) {
         List<AccountModel> accountModels = accountRepository.findByClientId(clientId);
-        List<AccountDTO> accountDTOs = new ArrayList<>();
 
-        for (AccountModel accountModel : accountModels) {
-            accountDTOs.add(accountDtoConverter.convert(accountModel));
-        }
-        return accountDTOs;
+        return accountModels.stream()
+                .map(accountDtoConverter::convert)
+                .collect(Collectors.toList());
     }
 
     @Transactional
     public AccountDTO createAccount(@NotBlank String accountName, @NotNull @PositiveOrZero BigDecimal balance, int clientId) {
-        boolean exists = accountRepository.existsByClientIdAndNameIgnoreCase(clientId, accountName);
+        ensureNameUniqueForCreation(accountName, clientId);
+        AccountModel accountModel = getAccountModel(accountName, balance, clientId);
+        accountRepository.save(accountModel);
 
-        if (!exists) {
-            AccountModel accountModel = new AccountModel();
-            accountModel.setBalance(balance);
-            accountModel.setClientId(clientId);
-            accountModel.setName(accountName);
-
-            accountRepository.save(accountModel);
-            return accountDtoConverter.convert(accountModel);
-        } else throw new AlreadyExistsException("Account with name " + accountName + " already exists");
+        return accountDtoConverter.convert(accountModel);
     }
 
     @Transactional
     public void deleteAccount(@NotNull @Positive int accountId, int clientId) {
-        accountExistenceValidation(accountId, clientId);
+        assertAccountExists(accountId, clientId);
 
-        int modifiedCount = accountRepository.deleteByIdAndClientId(accountId, clientId);
-
-        if (modifiedCount == 0) {
-            throw new OperationFailedException("Error has occurred while deleting account");
-        }
+        accountRepository.deleteByIdAndClientId(accountId, clientId);
     }
 
     @Transactional
     public AccountDTO updateAccountName(@NotBlank String newName, @NotNull @Positive int accountId, int clientId) {
-        int count = accountRepository.countByNameAndClientIdAndIdNot(newName, clientId, accountId);
+        ensureNameUniqueForUpdate(newName, accountId, clientId);
 
-        if (count > 0) {
-            throw new AlreadyExistsException("The account with this name already exists");
-        }
-
-        AccountModel accountModel = accountExistenceValidation(accountId, clientId);
+        AccountModel accountModel = assertAccountExists(accountId, clientId);
 
         accountModel.setName(newName);
         return accountDtoConverter.convert(accountModel);
     }
 
-    private AccountModel accountExistenceValidation(int accountId, int clientId) {
-        AccountModel accountModel = accountRepository.findById(accountId)
-                .orElseThrow(() -> new NotFoundException("No account found with Id: " + accountId));
+    private void ensureNameUniqueForUpdate(String newName, int accountId, int clientId) {
+        int count = accountRepository.countByNameAndClientIdAndIdNot(newName, clientId, accountId);
 
-        if (accountModel.getClientId() != clientId) {
-            throw new IllegalOwnerException("Account with Id: " + accountId + " belongs to another client");
+        if (count > 0) {
+            throw new AlreadyExistsException("The account with this name already exists");
         }
+    }
+
+    private AccountModel assertAccountExists(int accountId, int clientId) {
+        return accountRepository.findByIdAndClientId(accountId, clientId)
+                .orElseThrow(() -> new NotFoundException("No account found with Id: " + accountId));
+    }
+
+    private void ensureNameUniqueForCreation(String accountName, int clientId) {
+        if (accountRepository.existsByClientIdAndNameIgnoreCase(clientId, accountName)) {
+            throw new AlreadyExistsException("Account with name " + accountName + " already exists");
+        }
+    }
+
+    private static AccountModel getAccountModel(String accountName, BigDecimal balance, int clientId) {
+        AccountModel accountModel = new AccountModel();
+        accountModel.setBalance(balance);
+        accountModel.setClientId(clientId);
+        accountModel.setName(accountName);
         return accountModel;
     }
 }

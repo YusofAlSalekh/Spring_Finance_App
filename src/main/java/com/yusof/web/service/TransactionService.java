@@ -2,7 +2,7 @@ package com.yusof.web.service;
 
 import com.yusof.web.api.controller.TransactionCommandCreation;
 import com.yusof.web.entity.AccountModel;
-import com.yusof.web.entity.CategoryAmountModel;
+import com.yusof.web.entity.CategoryReportModel;
 import com.yusof.web.entity.TransactionCategoryModel;
 import com.yusof.web.entity.TransactionModel;
 import com.yusof.web.exceptions.NotFoundException;
@@ -13,7 +13,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -21,8 +20,8 @@ import org.springframework.validation.annotation.Validated;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -31,13 +30,12 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
     private final TransactionCategoryRepository transactionCategoryRepository;
-    private final Converter<TransactionModel, TransactionDTO> transactionModelToTransactionDtoConverter;
 
-    public List<CategoryAmountModel> getIncomeReportByCategory(int clientId, @NotNull @PastOrPresent LocalDate start, @NotNull @PastOrPresent LocalDate end) {
+    public List<CategoryReportModel> getIncomeReportByCategory(int clientId, @NotNull @PastOrPresent LocalDate start, @NotNull @PastOrPresent LocalDate end) {
         return transactionRepository.fetchIncomeByCategory(clientId, start.atStartOfDay(), end.plusDays(1).atStartOfDay());
     }
 
-    public List<CategoryAmountModel> getExpenseReportByCategory(int clientId, @NotNull @PastOrPresent LocalDate start, @NotNull @PastOrPresent LocalDate end) {
+    public List<CategoryReportModel> getExpenseReportByCategory(int clientId, @NotNull @PastOrPresent LocalDate start, @NotNull @PastOrPresent LocalDate end) {
         return transactionRepository.fetchExpenseByCategory(clientId, start.atStartOfDay(), end.plusDays(1).atStartOfDay());
     }
 
@@ -70,7 +68,7 @@ public class TransactionService {
     }
 
     private AccountModel getSenderAccountModel(int senderAccountId, int clientId) {
-        return accountRepository.findAccountByIdAndClientId(senderAccountId, clientId)
+        return accountRepository.findByIdAndClientId(senderAccountId, clientId)
                 .orElseThrow(() -> new NotFoundException("Account with id " + senderAccountId + " not found"));
     }
 
@@ -96,13 +94,10 @@ public class TransactionService {
     }
 
     private List<TransactionCategoryModel> getTransactionCategoryModels(List<Integer> categoryIds) {
-        List<TransactionCategoryModel> categoryModels = new ArrayList<>();
-        for (Integer categoryId : categoryIds) {
-            TransactionCategoryModel transactionCategoryModel = transactionCategoryRepository.findById(categoryId)
-                    .orElseThrow(() -> new NotFoundException("Category with id " + categoryId + " not found"));
-            categoryModels.add(transactionCategoryModel);
-        }
-        return categoryModels;
+        return categoryIds.stream()
+                .map(categoryId -> transactionCategoryRepository.findById(categoryId)
+                        .orElseThrow(() -> new NotFoundException("Category with id " + categoryId + " not found")))
+                .collect(Collectors.toList());
     }
 
     private static TransactionModel buildTransaction(BigDecimal amount, AccountModel receiverAccount, AccountModel senderAccount, List<TransactionCategoryModel> categoryModels) {

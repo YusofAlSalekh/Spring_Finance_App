@@ -11,11 +11,9 @@ public interface AccountRepository extends JpaRepository<AccountModel, Integer> 
 
     boolean existsByClientIdAndNameIgnoreCase(int clientId, String name);
 
-    int deleteByIdAndClientId(int accountId, int clientId);
+    void deleteByIdAndClientId(int accountId, int clientId);
 
     int countByNameAndClientIdAndIdNot(String name, int clientId, int accountId);
 
-    Optional<AccountModel> findAccountByIdAndClientId(int accountId, int clientId);
+    Optional<AccountModel> findByIdAndClientId(int id, int clientId);
 }
-
-

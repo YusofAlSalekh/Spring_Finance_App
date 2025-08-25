@@ -1,8 +1,11 @@
 package com.yusof.web.console;
 
 import com.yusof.web.api.controller.TransactionCommandCreation;
-import com.yusof.web.entity.CategoryAmountModel;
-import com.yusof.web.exceptions.*;
+import com.yusof.web.entity.CategoryReportModel;
+import com.yusof.web.exceptions.AlreadyExistsException;
+import com.yusof.web.exceptions.BadCredentialsException;
+import com.yusof.web.exceptions.NotFoundException;
+import com.yusof.web.exceptions.UnauthorizedException;
 import com.yusof.web.service.*;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import static com.yusof.web.console.MenuOptions.*;
+
 @Component
 @RequiredArgsConstructor
 public class ConsoleRunner implements CommandLineRunner {
@@ -25,7 +30,7 @@ public class ConsoleRunner implements CommandLineRunner {
     private final TransactionService transactionService;
     private final AccountService accountService;
     private final TransactionCategoryService transactionCategoryService;
-    private final AuthorizationService authorizationService;
+    private final AuthenticationService authenticationService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -38,13 +43,13 @@ public class ConsoleRunner implements CommandLineRunner {
                 int choice = requestInt("Enter your choice:");
 
                 switch (choice) {
-                    case 1:
+                    case REGISTER:
                         register();
                         break;
-                    case 2:
+                    case LOGIN:
                         login();
                         break;
-                    case 3:
+                    case EXIT:
                         System.out.println("Goodbye!");
                         System.exit(0);
                         break;
@@ -52,7 +57,7 @@ public class ConsoleRunner implements CommandLineRunner {
                         System.out.println("Invalid choice. Please choose again.");
                 }
             } catch (AlreadyExistsException | BadCredentialsException | UnauthorizedException | NotFoundException |
-                     IllegalOwnerException | OperationFailedException | IllegalArgumentException e) {
+                     IllegalArgumentException e) {
                 System.out.println(e.getMessage());
             } catch (ConstraintViolationException e) {
                 e.getConstraintViolations().forEach(v -> System.out.println(v.getMessage()));
@@ -66,7 +71,7 @@ public class ConsoleRunner implements CommandLineRunner {
         String email = requestString("Enter your email:");
         String password = requestString("Enter your password:");
 
-        authorizationService.register(email, password);
+        authenticationService.register(email, password);
         System.out.println("Your bank account has been created.");
     }
 
@@ -74,8 +79,8 @@ public class ConsoleRunner implements CommandLineRunner {
         String email = requestString("Enter your email:");
         String password = requestString("Enter your password:");
 
-        authorizationService.authorize(email, password);
-        int clientId = authorizationService.getClientId();
+        authenticationService.authorize(email, password);
+        int clientId = authenticationService.getClientId();
         System.out.println("You are logged in as " + email + ".");
         showDashboard(clientId);
     }
@@ -99,39 +104,39 @@ public class ConsoleRunner implements CommandLineRunner {
             int dashboardChoice = requestInt("Enter your choice:");
 
             switch (dashboardChoice) {
-                case 1:
+                case CREATE_NEW_ACCOUNT:
                     createNewAccount(clientId);
                     break;
-                case 2:
+                case SHOW_ACCOUNTS:
                     showAccounts(clientId);
                     break;
-                case 3:
+                case DELETE_ACCOUNT:
                     deleteAccount(clientId);
                     break;
-                case 4:
+                case CHANGE_ACCOUNT_NAME:
                     changeAccountName(clientId);
-                case 5:
+                case CREATE_NEW_CATEGORY:
                     createTransactionCategory(clientId);
                     break;
-                case 6:
+                case SHOW_CATEGORIES:
                     showTransactionCategories(clientId);
                     break;
-                case 7:
+                case DELETE_CATEGORY:
                     deleteTransactionCategory(clientId);
                     break;
-                case 8:
+                case CHANGE_CATEGORY_NAME:
                     updateTransactionCategory(clientId);
                     break;
-                case 9:
+                case GET_INCOME:
                     getInformationByIncome(clientId);
                     break;
-                case 10:
+                case GET_EXPENSE:
                     getInformationByExpense(clientId);
                     break;
-                case 11:
+                case PERFORM_TRANSACTION:
                     performTransaction(clientId);
                     break;
-                case 12:
+                case LOGOUT:
                     System.out.println("Logout successful");
                     return;
                 default:
@@ -231,11 +236,11 @@ public class ConsoleRunner implements CommandLineRunner {
 
         System.out.println("Here is information about your income:");
 
-        List<CategoryAmountModel> categoryAmountModels = transactionService.getIncomeReportByCategory(clientId, start, end);
+        List<CategoryReportModel> categoryReportModels = transactionService.getIncomeReportByCategory(clientId, start, end);
 
-        if (!categoryAmountModels.isEmpty()) {
-            for (CategoryAmountModel categoryAmountModel : categoryAmountModels) {
-                System.out.println(categoryAmountModel);
+        if (!categoryReportModels.isEmpty()) {
+            for (CategoryReportModel categoryReportModel : categoryReportModels) {
+                System.out.println(categoryReportModel);
             }
         } else {
             System.out.println("No income information found for the client.");
@@ -248,11 +253,11 @@ public class ConsoleRunner implements CommandLineRunner {
 
         System.out.println("Here is information about your expenses:");
 
-        List<CategoryAmountModel> categoryAmountModels = transactionService.getExpenseReportByCategory(clientId, start, end);
+        List<CategoryReportModel> categoryReportModels = transactionService.getExpenseReportByCategory(clientId, start, end);
 
-        if (!categoryAmountModels.isEmpty()) {
-            for (CategoryAmountModel categoryAmountModel : categoryAmountModels) {
-                System.out.println(categoryAmountModel);
+        if (!categoryReportModels.isEmpty()) {
+            for (CategoryReportModel categoryReportModel : categoryReportModels) {
+                System.out.println(categoryReportModel);
             }
         } else {
             System.out.println("No expense information found for the client.");
