@@ -4,13 +4,14 @@ import com.yusof.web.entity.CategoryReportModel;
 import com.yusof.web.exceptions.AlreadyExistsException;
 import com.yusof.web.exceptions.NotFoundException;
 import com.yusof.web.exceptions.UnauthorizedException;
+import com.yusof.web.security.CustomUserDetails;
 import com.yusof.web.service.TransactionCategoryDTO;
 import com.yusof.web.service.TransactionCategoryService;
 import com.yusof.web.service.TransactionService;
 import com.yusof.web.web.form.*;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,7 +26,7 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/category")
-public class WebTransactionCategoryController extends AbstractWebController {
+public class WebTransactionCategoryController {
     private final TransactionCategoryService transactionCategoryService;
     private final TransactionService transactionService;
 
@@ -39,10 +40,10 @@ public class WebTransactionCategoryController extends AbstractWebController {
     @PostMapping("/create")
     public String postTransactionCategoryCreation(@ModelAttribute("form") @Valid TransactionCategoryCreationForm form,
                                                   BindingResult bindingResult,
-                                                  HttpServletRequest request, RedirectAttributes redirectAttributes) {
+                                                  @AuthenticationPrincipal CustomUserDetails customUserDetails, RedirectAttributes redirectAttributes) {
         if (!bindingResult.hasErrors()) {
             try {
-                Integer clientId = getClientId(request);
+                Integer clientId = customUserDetails.getId();
 
                 TransactionCategoryDTO transactionCategory = transactionCategoryService.createCategory(
                         form.getName(),
@@ -72,11 +73,11 @@ public class WebTransactionCategoryController extends AbstractWebController {
     public String postTransactionCategoryDeletion(
             @ModelAttribute("form") @Valid TransactionCategoryDeletionForm form,
             BindingResult bindingResult,
-            HttpServletRequest request,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
             RedirectAttributes redirectAttributes) {
         if (!bindingResult.hasErrors()) {
             try {
-                Integer clientId = getClientId(request);
+                Integer clientId = customUserDetails.getId();
 
                 transactionCategoryService.deleteTransactionCategory(form.getId(), clientId);
 
@@ -106,11 +107,11 @@ public class WebTransactionCategoryController extends AbstractWebController {
     public String postTransactionCategoryUpdating(
             @ModelAttribute("form") @Valid TransactionCategoryUpdatingForm form,
             BindingResult bindingResult,
-            HttpServletRequest request, RedirectAttributes redirectAttributes) {
+            @AuthenticationPrincipal CustomUserDetails customUserDetails, RedirectAttributes redirectAttributes) {
 
         if (!bindingResult.hasErrors()) {
             try {
-                Integer clientId = getClientId(request);
+                Integer clientId = customUserDetails.getId();
 
                 transactionCategoryService.updateTransactionCategory(
                         form.getName(),
@@ -144,10 +145,10 @@ public class WebTransactionCategoryController extends AbstractWebController {
     @PostMapping("/report/expense")
     public String postExpenseReport(@ModelAttribute("form") @Valid ExpenseReportForm form,
                                     BindingResult bindingResult,
-                                    HttpServletRequest request,
+                                    @AuthenticationPrincipal CustomUserDetails customUserDetails,
                                     Model model) {
         if (!bindingResult.hasErrors()) {
-            Integer clientId = getClientId(request);
+            Integer clientId = customUserDetails.getId();
 
             List<CategoryReportModel> transactions = transactionService.getExpenseReportByCategory(clientId,
                     form.getStartDate(),
@@ -168,10 +169,10 @@ public class WebTransactionCategoryController extends AbstractWebController {
     @PostMapping("/report/income")
     public String postIncomeReport(@ModelAttribute("form") @Valid IncomeReportForm form,
                                    BindingResult bindingResult,
-                                   HttpServletRequest request,
+                                   @AuthenticationPrincipal CustomUserDetails customUserDetails,
                                    Model model) {
         if (!bindingResult.hasErrors()) {
-            Integer clientId = getClientId(request);
+            Integer clientId = customUserDetails.getId();
 
             List<CategoryReportModel> transactions = transactionService.getIncomeReportByCategory(
                     clientId,

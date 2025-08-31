@@ -79,8 +79,7 @@ public class ConsoleRunner implements CommandLineRunner {
         String email = requestString("Enter your email:");
         String password = requestString("Enter your password:");
 
-        authenticationService.authorize(email, password);
-        int clientId = authenticationService.getClientId();
+        int clientId = authenticationService.authorize(email, password).getId();
         System.out.println("You are logged in as " + email + ".");
         showDashboard(clientId);
     }
@@ -88,18 +87,18 @@ public class ConsoleRunner implements CommandLineRunner {
     private void showDashboard(int clientId) {
         while (true) {
             System.out.println("User Dashboard:");
-            System.out.println("1. Create an Account");
-            System.out.println("2. Show Accounts");
-            System.out.println("3. Delete an Account");
-            System.out.println("4. Change Account Name");
-            System.out.println("5. Create Category");
-            System.out.println("6. Show Categories");
-            System.out.println("7. Delete Category");
-            System.out.println("8. Change Category Name");
-            System.out.println("9. Show income information");
-            System.out.println("10. Show expense information");
-            System.out.println("11. Transfer money between accounts");
-            System.out.println("12. Logout");
+            System.out.println("4. Create an Account");
+            System.out.println("5. Show Accounts");
+            System.out.println("6. Delete an Account");
+            System.out.println("7. Change Account Name");
+            System.out.println("8. Create Category");
+            System.out.println("9. Show Categories");
+            System.out.println("10. Delete Category");
+            System.out.println("11. Change Category Name");
+            System.out.println("12. Show income information");
+            System.out.println("13. Show expense information");
+            System.out.println("14. Transfer money between accounts");
+            System.out.println("15. Logout");
 
             int dashboardChoice = requestInt("Enter your choice:");
 

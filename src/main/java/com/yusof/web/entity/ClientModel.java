@@ -1,10 +1,13 @@
 package com.yusof.web.entity;
 
+import com.yusof.web.security.ClientRole;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -20,6 +23,13 @@ public class ClientModel {
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    @ElementCollection(targetClass = ClientRole.class, fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "client_role",
+            joinColumns = @JoinColumn(name = "client_id"))
+    @Column(name = "role")
+    private Set<ClientRole> roles = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {

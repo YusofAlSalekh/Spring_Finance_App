@@ -32,11 +32,20 @@
     <a href="/transaction/income" class="btn btn-primary">Show income report</a>
 </div>
 
+<div class="mt-3">
+    <a href="/logout" class="btn btn-secondary">Logout</a>
+</div>
+
 <#if accounts?? && (accounts?size > 0)>
     <h3>Your Accounts</h3>
     <table class="table table-bordered">
         <thead>
-        <tr><th>ID</th><th>Name</th><th>Balance</th><th>Client Id</th></tr>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Balance</th>
+            <th>Client Id</th>
+        </tr>
         </thead>
         <tbody>
         <#list accounts as a>
@@ -57,7 +66,11 @@
     <h3>Your Categories</h3>
     <table class="table table-bordered">
         <thead>
-        <tr><th>ID</th><th>Name</th><th>Client Id</th></tr>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Client Id</th>
+        </tr>
         </thead>
         <tbody>
         <#list categories as c>
