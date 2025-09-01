@@ -2,13 +2,14 @@ package com.yusof.web.web.controller;
 
 import com.yusof.web.api.controller.TransactionCommandCreation;
 import com.yusof.web.exceptions.NotFoundException;
+import com.yusof.web.security.CustomUserDetails;
 import com.yusof.web.service.TransactionCategoryDTO;
 import com.yusof.web.service.TransactionCategoryService;
 import com.yusof.web.service.TransactionService;
 import com.yusof.web.web.form.TransactionCreationForm;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,13 +24,13 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/transaction")
-public class WebTransactionController extends AbstractWebController {
+public class WebTransactionController {
     private final TransactionService transactionService;
     private final TransactionCategoryService transactionCategoryService;
 
     @ModelAttribute("categories")
-    public List<TransactionCategoryDTO> getCategories(HttpServletRequest request) {
-        Integer clientId = getClientId(request);
+    public List<TransactionCategoryDTO> getCategories(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        Integer clientId = customUserDetails.getId();
         return transactionCategoryService.viewTransactionCategory(clientId);
     }
 
@@ -42,9 +43,9 @@ public class WebTransactionController extends AbstractWebController {
     @PostMapping("/create")
     public String postTransactionCreation(@ModelAttribute("form") @Valid TransactionCreationForm form,
                                           BindingResult bindingResult,
-                                          HttpServletRequest request,
+                                          @AuthenticationPrincipal CustomUserDetails customUserDetails,
                                           RedirectAttributes redirectAttributes) {
-        Integer clientId = getClientId(request);
+        Integer clientId = customUserDetails.getId();
         if (!bindingResult.hasErrors()) {
             try {
                 TransactionCommandCreation command = TransactionCommandCreation.builder()

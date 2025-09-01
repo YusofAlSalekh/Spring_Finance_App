@@ -3,14 +3,15 @@ package com.yusof.web.web.controller;
 import com.yusof.web.exceptions.AlreadyExistsException;
 import com.yusof.web.exceptions.NotFoundException;
 import com.yusof.web.exceptions.UnauthorizedException;
+import com.yusof.web.security.CustomUserDetails;
 import com.yusof.web.service.AccountDTO;
 import com.yusof.web.service.AccountService;
 import com.yusof.web.web.form.AccountCreationForm;
 import com.yusof.web.web.form.AccountDeletionForm;
 import com.yusof.web.web.form.AccountNameChangingForm;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,7 +24,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/account")
-public class WebAccountController extends AbstractWebController {
+public class WebAccountController {
     private final AccountService accountService;
 
     @GetMapping("/create")
@@ -37,11 +38,11 @@ public class WebAccountController extends AbstractWebController {
     public String postAccountCreation(@ModelAttribute("form") @Valid AccountCreationForm form,
                                       BindingResult bindingResult,
                                       RedirectAttributes redirectAttributes,
-                                      HttpServletRequest request) {
+                                      @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
         if (!bindingResult.hasErrors()) {
             try {
-                Integer clientId = getClientId(request);
+                Integer clientId = customUserDetails.getId();
                 AccountDTO accountDTO = accountService.createAccount(
                         form.getName(),
                         form.getBalance(),
@@ -73,10 +74,10 @@ public class WebAccountController extends AbstractWebController {
     public String postAccountDeletion(@ModelAttribute("form") @Valid AccountDeletionForm form,
                                       BindingResult bindingResult,
                                       RedirectAttributes redirectAttributes,
-                                      HttpServletRequest request) {
+                                      @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         if (!bindingResult.hasErrors()) {
             try {
-                Integer clientId = getClientId(request);
+                Integer clientId = customUserDetails.getId();
                 accountService.deleteAccount(
                         form.getAccountId(),
                         clientId
@@ -107,10 +108,10 @@ public class WebAccountController extends AbstractWebController {
     public String postAccountNameChanging(@ModelAttribute("form") @Valid AccountNameChangingForm form,
                                           BindingResult bindingResult,
                                           RedirectAttributes redirectAttributes,
-                                          HttpServletRequest request) {
+                                          @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         if (!bindingResult.hasErrors()) {
             try {
-                Integer clientId = getClientId(request);
+                Integer clientId = customUserDetails.getId();
                 AccountDTO updatedAccountName = accountService.updateAccountName(
                         form.getName(),
                         form.getAccountId(),

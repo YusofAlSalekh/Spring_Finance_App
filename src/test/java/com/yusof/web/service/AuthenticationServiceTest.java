@@ -5,7 +5,6 @@ import com.yusof.web.exceptions.AlreadyExistsException;
 import com.yusof.web.exceptions.BadCredentialsException;
 import com.yusof.web.exceptions.NotFoundException;
 import com.yusof.web.repository.ClientRepository;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -14,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -30,6 +30,9 @@ class AuthenticationServiceTest {
 
     @Mock
     Converter<ClientModel, ClientDTO> clientDtoConverter;
+
+    @Mock
+    PasswordEncoder passwordEncoder;
 
 
     @Test
@@ -74,7 +77,7 @@ class AuthenticationServiceTest {
     void authorize_success() {
         String email = "user@gmail.com";
         String password = "password";
-        String hash = DigestUtils.md5Hex(password);
+        String hash = "hash";
 
         ClientModel model = new ClientModel();
         model.setId(1);
@@ -85,17 +88,18 @@ class AuthenticationServiceTest {
         dto.setId(1);
         dto.setEmail(email);
 
-        when(clientRepository.findByEmailAndPassword(email, hash)).thenReturn(Optional.of(model));
+        when(clientRepository.findByEmail(email)).thenReturn(Optional.of(model));
+        when(passwordEncoder.matches(password, model.getPassword())).thenReturn(true);
         when(clientDtoConverter.convert(model)).thenReturn(dto);
 
         ClientDTO result = subject.authorize(email, password);
 
         assertNotNull(result);
         assertEquals(1, result.getId());
-        assertEquals(1, subject.getClientId());
+        assertEquals(1, dto.getId());
         assertEquals(email, result.getEmail());
 
-        verify(clientRepository).findByEmailAndPassword(email, hash);
+        verify(clientRepository).findByEmail(email);
         verify(clientDtoConverter).convert(model);
         verifyNoMoreInteractions(clientRepository, clientDtoConverter);
     }
@@ -104,13 +108,12 @@ class AuthenticationServiceTest {
     void authorize_throwsBadCredentialsException() {
         String email = "user@gmail.com";
         String password = "password";
-        String hash = DigestUtils.md5Hex(password);
 
-        when(clientRepository.findByEmailAndPassword(email, hash)).thenReturn(Optional.empty());
+        when(clientRepository.findByEmail(email)).thenReturn(Optional.empty());
 
         assertThrowsExactly(BadCredentialsException.class, () -> subject.authorize(email, password));
 
-        verify(clientRepository).findByEmailAndPassword(email, hash);
+        verify(clientRepository).findByEmail(email);
         verifyNoMoreInteractions(clientRepository);
         verify(clientDtoConverter, never()).convert(any());
     }
@@ -119,7 +122,7 @@ class AuthenticationServiceTest {
     void register_success() {
         String email = "user@gmail.com";
         String password = "password";
-        String hash = DigestUtils.md5Hex(password);
+        String hash = passwordEncoder.encode(password);
 
         ClientDTO dto = new ClientDTO();
         dto.setEmail(email);

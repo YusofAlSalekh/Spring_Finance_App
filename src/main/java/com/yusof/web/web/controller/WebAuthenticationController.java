@@ -1,13 +1,9 @@
 package com.yusof.web.web.controller;
 
 import com.yusof.web.exceptions.AlreadyExistsException;
-import com.yusof.web.exceptions.BadCredentialsException;
 import com.yusof.web.service.AuthenticationService;
 import com.yusof.web.service.ClientDTO;
-import com.yusof.web.web.form.AuthorisationForm;
 import com.yusof.web.web.form.RegistrationForm;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -24,13 +20,11 @@ public class WebAuthenticationController {
     private final AuthenticationService authenticationService;
 
     @GetMapping("/login")
-    public String getAuthorisation(Model model) {
-        model.addAttribute("form", new AuthorisationForm());
-
+    public String getAuthorisation() {
         return "authorisation";
     }
 
-    @PostMapping("/login")
+    /*@PostMapping("/login")
     public String postAuthorisation(@ModelAttribute("form") @Valid AuthorisationForm form,
                                     BindingResult bindingResult,
                                     HttpServletRequest request) {
@@ -49,7 +43,7 @@ public class WebAuthenticationController {
             }
         }
         return "authorisation";
-    }
+    }*/
 
     @GetMapping("/register")
     public String getRegistration(Model model) {

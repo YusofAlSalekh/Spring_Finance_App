@@ -6,8 +6,6 @@ import com.yusof.web.exceptions.AlreadyExistsException;
 import com.yusof.web.exceptions.BadCredentialsException;
 import com.yusof.web.exceptions.NotFoundException;
 import com.yusof.web.exceptions.UnauthorizedException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -17,15 +15,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.util.stream.Collectors;
 
 public abstract class AbstractApiController {
-    protected Integer getClientId(HttpServletRequest httpServletRequest) {
-        HttpSession session = httpServletRequest.getSession(false);
-        if (session == null || session.getAttribute("clientId") == null) {
-            throw new UnauthorizedException("User is not logged in");
-        }
-
-        return (Integer) session.getAttribute("clientId");
-    }
-
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorized(UnauthorizedException e) {
         return ResponseEntity
