@@ -20,30 +20,9 @@ public class WebAuthenticationController {
     private final AuthenticationService authenticationService;
 
     @GetMapping("/login")
-    public String getAuthorisation() {
-        return "authorisation";
+    public String getLogin() {
+        return "login";
     }
-
-    /*@PostMapping("/login")
-    public String postAuthorisation(@ModelAttribute("form") @Valid AuthorisationForm form,
-                                    BindingResult bindingResult,
-                                    HttpServletRequest request) {
-
-        if (!bindingResult.hasErrors()) {
-            try {
-                ClientDTO clientDTO = authenticationService.authorize(
-                        form.getEmail(),
-                        form.getPassword());
-
-                HttpSession session = request.getSession();
-                session.setAttribute("clientId", clientDTO.getId());
-                return "redirect:/menu";
-            } catch (BadCredentialsException e) {
-                bindingResult.reject("authorisation.failed", "Email or password is invalid");
-            }
-        }
-        return "authorisation";
-    }*/
 
     @GetMapping("/register")
     public String getRegistration(Model model) {

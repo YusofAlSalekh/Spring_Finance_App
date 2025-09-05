@@ -16,7 +16,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Controller
-public class WebMenu {
+public class WebMenuController {
     private final AccountService accountService;
     private final TransactionCategoryService transactionCategoryService;
 

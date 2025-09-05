@@ -75,6 +75,7 @@ public class WebTransactionCategoryController {
             BindingResult bindingResult,
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             RedirectAttributes redirectAttributes) {
+
         if (!bindingResult.hasErrors()) {
             try {
                 Integer clientId = customUserDetails.getId();
@@ -150,7 +151,8 @@ public class WebTransactionCategoryController {
         if (!bindingResult.hasErrors()) {
             Integer clientId = customUserDetails.getId();
 
-            List<CategoryReportModel> transactions = transactionService.getExpenseReportByCategory(clientId,
+            List<CategoryReportModel> transactions = transactionService.getExpenseReportByCategory(
+                    clientId,
                     form.getStartDate(),
                     form.getEndDate());
 
