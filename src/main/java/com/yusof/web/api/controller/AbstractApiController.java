@@ -5,7 +5,6 @@ import com.yusof.web.api.json.response.ErrorResponse;
 import com.yusof.web.exceptions.AlreadyExistsException;
 import com.yusof.web.exceptions.BadCredentialsException;
 import com.yusof.web.exceptions.NotFoundException;
-import com.yusof.web.exceptions.UnauthorizedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -15,13 +14,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.util.stream.Collectors;
 
 public abstract class AbstractApiController {
-    @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<ErrorResponse> handleUnauthorized(UnauthorizedException e) {
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(new ErrorResponse(e.getMessage()));
-    }
-
     @ExceptionHandler(AlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleConflict(AlreadyExistsException e) {
         return ResponseEntity
