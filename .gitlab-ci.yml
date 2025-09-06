@@ -1,5 +1,18 @@
 image: maven:3.9.6-eclipse-temurin-17
 
+services:
+  - name: postgres:16-alpine
+    alias: postgres
+
+variables:
+  POSTGRES_DB: postgres
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: "060571"
+
+  SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres
+  SPRING_DATASOURCE_USERNAME: postgres
+  SPRING_DATASOURCE_PASSWORD: "060571"
+
 test:
   script:
     - mvn clean test
