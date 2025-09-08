@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+<include file="db.changelog-master.xml"/>
+
+    <changeSet id="transactionRepositoryTest" author="yus" context="test">
+        <insert tableName="client">
+            <column name="id" value="1"/>
+            <column name="email" value="test@example.com"/>
+            <column name="password" value="password"/>
+        </insert>
+
+        <insert tableName="account">
+            <column name="id" value="1"/>
+            <column name="name" value="Receiver Account"/>
+            <column name="client_id" value="1"/>
+            <column name="balance" valueNumeric="100.00"/>
+        </insert>
+        <insert tableName="account">
+            <column name="id" value="2"/>
+            <column name="name" value="Sender Account"/>
+            <column name="client_id" value="1"/>
+            <column name="balance" valueNumeric="200.00"/>
+        </insert>
+
+        <insert tableName="category">
+            <column name="id" value="1"/>
+            <column name="name" value="Cleaning"/>
+            <column name="client_id" value="1"/>
+        </insert>
+        <insert tableName="category">
+            <column name="id" value="2"/>
+            <column name="name" value="Food"/>
+            <column name="client_id" value="1"/>
+        </insert>
+
+        <insert tableName="transaction">
+            <column name="id" value="1"/>
+            <column name="created_date" valueDate="2025-09-05 10:00:00"/>
+            <column name="amount" valueNumeric="10.00"/>
+            <column name="sender_id" value="1"/>
+            <column name="receiver_id" value="2"/>
+        </insert>
+
+        <insert tableName="transaction">
+            <column name="id" value="2"/>
+            <column name="created_date" valueDate="2025-09-07 10:00:00"/>
+            <column name="amount" valueNumeric="20.00"/>
+            <column name="sender_id" value="1"/>
+            <column name="receiver_id" value="2"/>
+        </insert>
+
+
+        <insert tableName="transaction_to_category">
+            <column name="transaction_id" value="1"/>
+            <column name="category_id" value="1"/>
+        </insert>
+
+        <insert tableName="transaction_to_category">
+            <column name="transaction_id" value="2"/>
+            <column name="category_id" value="2"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,5 +1,7 @@
 package com.yusof.web.api.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yusof.web.api.json.request.RegistrationRequest;
 import com.yusof.web.exceptions.AlreadyExistsException;
 import com.yusof.web.exceptions.NotFoundException;
 import com.yusof.web.service.AuthenticationService;
@@ -9,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -22,6 +25,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Import(MockSecurityConfig.class)
 @WebMvcTest(AuthenticationController.class)
+@WithUserDetails(
+        value = "user@gmail.com",
+        userDetailsServiceBeanName = "userDetailsService"
+)
 class AuthenticationControllerTest {
     @MockitoBean
     AuthenticationService authenticationService;
@@ -29,30 +36,23 @@ class AuthenticationControllerTest {
     @Autowired
     MockMvc mockMvc;
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Test
     void getClient_returnsUserDto() throws Exception {
+        ClientDTO dto = new ClientDTO(1, "user@gmail.com");
+
         when(authenticationService.getClientById(1))
-                .thenReturn(new ClientDTO(1, "user@gmail.com"));
+                .thenReturn(dto);
 
         mockMvc.perform(get("/api/client"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("""
-                        {
-                          "id": 1,
-                          "email": "user@gmail.com"
-                        }"""));
+                .andExpect(content().json(objectMapper.writeValueAsString(dto)));
 
         verify(authenticationService).getClientById(1);
     }
 
-    @WithUserDetails(
-            value = "notUser@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void getClient_notFound_returns404() throws Exception {
         when(authenticationService.getClientById(1))
@@ -62,19 +62,18 @@ class AuthenticationControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @WithAnonymousUser
     @Test
     void register_success() throws Exception {
-        when(authenticationService.register("user@mail.com", "password"))
-                .thenReturn(new ClientDTO(1, "user@mail.com"));
+        ClientDTO dto = new ClientDTO(1, "user@mail.com");
+        RegistrationRequest request = new RegistrationRequest("user@mail.com", "password");
 
-        String body = """
-                  { "login": "user@mail.com",
-                   "password": "password" }
-                """;
+        when(authenticationService.register("user@mail.com", "password"))
+                .thenReturn(dto);
 
         mockMvc.perform(post("/api/client/register")
                         .contentType(APPLICATION_JSON)
-                        .content(body))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.email").value("user@mail.com"));
@@ -82,30 +81,28 @@ class AuthenticationControllerTest {
         verify(authenticationService).register("user@mail.com", "password");
     }
 
+    @WithAnonymousUser
     @Test
-    void register_Exception_clientExists() throws Exception {
+    void register_exception_clientExists() throws Exception {
+        RegistrationRequest request = new RegistrationRequest("user@mail.com", "password");
+
         when(authenticationService.register("user@mail.com", "password"))
                 .thenThrow(new AlreadyExistsException("Email already in use"));
 
-        String body = """
-                  {"login":"user@mail.com","password":"password"}
-                """;
-
         mockMvc.perform(post("/api/client/register")
                         .contentType(APPLICATION_JSON)
-                        .content(body))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());
     }
 
+    @WithAnonymousUser
     @Test
     void register_validationError_returns400() throws Exception {
-        String body = """
-                {"login":"","password":""}
-                """;
+        RegistrationRequest request = new RegistrationRequest("", "password");
 
         mockMvc.perform(post("/api/client/register")
                         .contentType("application/json")
-                        .content(body))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
 }

@@ -24,6 +24,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Import(MockSecurityConfig.class)
 @WebMvcTest(WebTransactionController.class)
+@WithUserDetails(
+        value = "user@gmail.com",
+        userDetailsServiceBeanName = "userDetailsService"
+)
 class WebTransactionControllerTest {
     @Autowired
     MockMvc mockMvc;
@@ -34,10 +38,6 @@ class WebTransactionControllerTest {
     @MockitoBean
     TransactionService transactionService;
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void getCategories() throws Exception {
         when(transactionCategoryService.viewTransactionCategory(1))
@@ -53,10 +53,6 @@ class WebTransactionControllerTest {
         verify(transactionCategoryService).viewTransactionCategory(1);
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postTransactionCreation_success_redirectsMenu() throws Exception {
         when(transactionCategoryService.viewTransactionCategory(1))
@@ -76,10 +72,6 @@ class WebTransactionControllerTest {
         verify(transactionCategoryService).viewTransactionCategory(1);
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postTransactionCreation_categoryNotFound_fieldError() throws Exception {
         when(transactionCategoryService.viewTransactionCategory(1))
@@ -100,10 +92,6 @@ class WebTransactionControllerTest {
                 .andExpect(model().attributeHasFieldErrors("form", "categoryIds"));
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postTransactionCreation_illegalArgument_globalError() throws Exception {
         when(transactionCategoryService.viewTransactionCategory(1))
@@ -125,10 +113,6 @@ class WebTransactionControllerTest {
         verify(transactionCategoryService).viewTransactionCategory(1);
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postTransactionCreation_validationErrors_keepForm() throws Exception {
         when(transactionCategoryService.viewTransactionCategory(1))

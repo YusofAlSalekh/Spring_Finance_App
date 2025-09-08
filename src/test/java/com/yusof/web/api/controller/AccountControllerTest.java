@@ -1,5 +1,9 @@
 package com.yusof.web.api.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yusof.web.api.json.request.AccountCreationRequest;
+import com.yusof.web.api.json.request.AccountDeletionRequest;
+import com.yusof.web.api.json.request.AccountNameChangingRequest;
 import com.yusof.web.exceptions.AlreadyExistsException;
 import com.yusof.web.exceptions.NotFoundException;
 import com.yusof.web.service.AccountDTO;
@@ -27,6 +31,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(AccountController.class)
 @Import(MockSecurityConfig.class)
+@WithUserDetails(
+        value = "user@gmail.com",
+        userDetailsServiceBeanName = "userDetailsService"
+)
 class AccountControllerTest {
 
     @MockitoBean
@@ -35,10 +43,9 @@ class AccountControllerTest {
     @Autowired
     MockMvc mockMvc;
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
+    @Autowired
+    ObjectMapper objectMapper;
+
     @Test
     void createAccount_success() throws Exception {
         AccountDTO accountDTO = new AccountDTO(1, "AccountName", new BigDecimal("100.00"), 1);
@@ -46,164 +53,126 @@ class AccountControllerTest {
         when(accountService.createAccount("AccountName", new BigDecimal("100.00"), 1))
                 .thenReturn(accountDTO);
 
+        AccountCreationRequest request = new AccountCreationRequest("AccountName", new BigDecimal("100.00"));
+
         mockMvc.perform(post("/api/account/create")
                         .contentType(APPLICATION_JSON)
-                        .content("{\"name\":\"AccountName\",\"balance\":100.00}"))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
 
         verify(accountService).createAccount("AccountName", new BigDecimal("100.00"), 1);
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void createAccount_AlreadyExistsException() throws Exception {
         when(accountService.createAccount("AccountName", new BigDecimal("10.00"), 1))
                 .thenThrow(new AlreadyExistsException("Account already exists"));
 
-        String body = """
-                  {"name":"AccountName","balance": 10.00}
-                """;
+        AccountCreationRequest request = new AccountCreationRequest("AccountName", new BigDecimal("10.00"));
 
         mockMvc.perform(post("/api/account/create")
                         .contentType(APPLICATION_JSON)
-                        .content(body))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService")
     @Test
     void createAccount_validationError() throws Exception {
-        String body = """
-                  {"name":"","balance":-5}
-                """;
+        AccountCreationRequest request = new AccountCreationRequest("", new BigDecimal("-5.00"));
 
         mockMvc.perform(post("/api/account/create")
                         .contentType(APPLICATION_JSON)
-                        .content(body))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService")
     @Test
     void deleteAccount_success() throws Exception {
-        String body = """
-                  {"accountId": 5}
-                """;
+        AccountDeletionRequest request = new AccountDeletionRequest(5);
 
         mockMvc.perform(post("/api/account/delete")
                         .contentType(APPLICATION_JSON)
-                        .content(body))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNoContent());
 
         verify(accountService).deleteAccount(5, 1);
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService")
     @Test
     void deleteAccount_notFound_404() throws Exception {
+        AccountDeletionRequest request = new AccountDeletionRequest(5);
+
         doThrow(new NotFoundException("No account found with Id: 5"))
                 .when(accountService).deleteAccount(5, 1);
 
-        String body = """
-                  {"accountId": 5}
-                """;
-
         mockMvc.perform(post("/api/account/delete")
                         .contentType(APPLICATION_JSON)
-                        .content(body))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService")
     @Test
     void deleteAccount_validationError_400() throws Exception {
-        String body = """
-                  {"accountId": 0}
-                """;
+        AccountDeletionRequest request = new AccountDeletionRequest(0);
 
         mockMvc.perform(post("/api/account/delete")
                         .contentType(APPLICATION_JSON)
-                        .content(body))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService")
     @Test
     void updateAccount_success() throws Exception {
+        AccountNameChangingRequest request = new AccountNameChangingRequest("NewName", 5);
+
         when(accountService.updateAccountName("NewName", 5, 1))
                 .thenReturn(new AccountDTO(5, "NewName", new BigDecimal("10.00"), 1));
 
-        String body = """
-                  {"name":"NewName","accountId":5}
-                """;
-
         mockMvc.perform(post("/api/account/update")
                         .contentType(APPLICATION_JSON)
-                        .content(body))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("NewName"));
 
         verify(accountService).updateAccountName("NewName", 5, 1);
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService")
     @Test
     void updateAccount_AlreadyExists() throws Exception {
+        AccountNameChangingRequest request = new AccountNameChangingRequest("Existing", 5);
+
         when(accountService.updateAccountName("Existing", 5, 1))
                 .thenThrow(new AlreadyExistsException("The account with this name already exists"));
 
-        String body = """
-                  {"name":"Existing","accountId":5}
-                """;
-
         mockMvc.perform(post("/api/account/update")
                         .contentType(APPLICATION_JSON)
-                        .content(body))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService")
     @Test
     void updateAccount_notFound_404() throws Exception {
+        AccountNameChangingRequest request = new AccountNameChangingRequest("NewName", 99);
+
         when(accountService.updateAccountName("NewName", 99, 1))
                 .thenThrow(new NotFoundException("No account found with Id: 99"));
 
-        String body = """
-                  {"name":"NewName","accountId":99}
-                """;
-
         mockMvc.perform(post("/api/account/update")
                         .contentType(APPLICATION_JSON)
-                        .content(body))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService")
     @Test
     void updateAccount_validationError_400() throws Exception {
-        String body = """
-                  {"name":"","accountId":0}
-                """;
+        AccountNameChangingRequest request = new AccountNameChangingRequest("", 0);
 
         mockMvc.perform(post("/api/account/update")
                         .contentType(APPLICATION_JSON)
-                        .content(body))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService")
     @Test
     void showAccounts_ok_returnsList() throws Exception {
         when(accountService.viewAccount(1)).thenReturn(List.of(
