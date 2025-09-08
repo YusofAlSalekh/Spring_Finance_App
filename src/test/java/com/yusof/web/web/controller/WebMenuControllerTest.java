@@ -46,7 +46,7 @@ class WebMenuControllerTest {
 
         mockMvc.perform(get("/menu").param("show", "accounts"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("menu"))
+                .andExpect(view().name("menu-form"))
                 .andExpect(model().attribute("accounts", accounts))
                 .andExpect(model().attribute("id", 1))
                 .andExpect(model().attribute("name", "user@gmail.com"))
@@ -59,7 +59,7 @@ class WebMenuControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("id", 1))
                 .andExpect(model().attribute("name", "user@gmail.com"))
-                .andExpect(view().name("menu"))
+                .andExpect(view().name("menu-form"))
                 .andExpect(model().attributeDoesNotExist("accounts", "categories"));
     }
 
@@ -70,7 +70,7 @@ class WebMenuControllerTest {
 
         mockMvc.perform(get("/menu").param("show", "categories"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("menu"))
+                .andExpect(view().name("menu-form"))
                 .andExpect(model().attribute("categories", categories))
                 .andExpect(model().attribute("id", 1))
                 .andExpect(model().attribute("name", "user@gmail.com"))
