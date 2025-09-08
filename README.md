@@ -1,16 +1,31 @@
-**Jborn Web** is a full-stack **Java Spring Boot application** for managing personal and business finances.  
-It allows users to create accounts, record transactions, and generate reports such as account balances, transaction history, and expense summaries.
+# Personal Finance Web Application
 
-## Features
-- User authentication and secure access to accounts  
-- Account and transaction management (create, update, delete)  
-- Financial reports (daily transactions, aggregated balances by category, etc.)  
-- Database schema management with **Liquibase**  
-- RESTful API endpoints for integration and extension  
+A **Java Spring Boot web application** for managing personal finances. Users can register, create accounts, record categorized transactions, and generate income/expense reports — all through a simple web UI and REST API.  
+
+---
+
+## What I Built
+- Full-stack Spring Boot application with secure authentication, account management, transaction tracking, and reporting  
+- PostgreSQL database with **Liquibase** migrations for reliable schema evolution  
+- RESTful APIs integrated with **Freemarker + Bootstrap UI**  
+- **Spring Security** login/registration with password hashing  
+- Unit and integration testing using **JUnit 5, Mockito, and Spring Boot Test**  
+
+---
 
 ## Tech Stack
-- Java 17, Spring Boot, Spring MVC  
-- PostgreSQL, JPA/Hibernate  
-- Liquibase for database migrations  
-- Maven for build & dependency management  
-- JUnit & Mockito for testing  
+- **Backend**: Java 17, Spring Boot, Spring MVC, JPA/Hibernate  
+- **Database**: PostgreSQL + Liquibase  
+- **Frontend**: Freemarker templates, Bootstrap  
+- **Testing**: JUnit 5, Mockito, Spring Boot Test  
+- **Build and Tools**: Maven, Lombok, GitLab CI  
+
+---
+
+## Core Features
+- User authentication and registration  
+- Account creation and management  
+- Categorized income and expense transactions  
+- Financial reports (balances, expenses by category)  
+- RESTful API endpoints for integration  
+- Responsive UI with Freemarker templates  
