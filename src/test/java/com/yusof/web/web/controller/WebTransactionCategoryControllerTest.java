@@ -29,6 +29,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Import(MockSecurityConfig.class)
 @WebMvcTest(WebTransactionCategoryController.class)
+@WithUserDetails(
+        value = "user@gmail.com",
+        userDetailsServiceBeanName = "userDetailsService"
+)
 class WebTransactionCategoryControllerTest {
     @Autowired
     MockMvc mockMvc;
@@ -39,7 +43,6 @@ class WebTransactionCategoryControllerTest {
     @MockitoBean
     TransactionService transactionService;
 
-
     @Test
     void getTransactionCategoryCreation() throws Exception {
         mockMvc.perform(get("/category/create"))
@@ -49,10 +52,6 @@ class WebTransactionCategoryControllerTest {
                 .andExpect(view().name("transactionCategoryCreation"));
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postCategoryCreation_success() throws Exception {
         TransactionCategoryDTO transactionCategory = new TransactionCategoryDTO(1, "CategoryName", 1);
@@ -66,10 +65,6 @@ class WebTransactionCategoryControllerTest {
                 .andExpect(flash().attributeExists("success"));
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postCategoryCreation_unauthorized_redirectsLogin() throws Exception {
         when(transactionCategoryService.createCategory("CategoryName", 1))
@@ -81,10 +76,6 @@ class WebTransactionCategoryControllerTest {
                 .andExpect(redirectedUrl("/login"));
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postCategoryCreation_alreadyExists_fieldError() throws Exception {
         when(transactionCategoryService.createCategory("CategoryName", 1))
@@ -97,10 +88,6 @@ class WebTransactionCategoryControllerTest {
                 .andExpect(model().attributeHasFieldErrors("form", "name"));
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postCategoryCreation_validationErrors() throws Exception {
         mockMvc.perform(post("/category/create")
@@ -119,10 +106,6 @@ class WebTransactionCategoryControllerTest {
                 .andExpect(model().attribute("form", instanceOf(TransactionCategoryDeletionForm.class)));
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postCategoryDeletion_success() throws Exception {
         mockMvc.perform(post("/category/delete")
@@ -132,10 +115,6 @@ class WebTransactionCategoryControllerTest {
                 .andExpect(flash().attributeExists("success"));
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postCategoryDeletion_unauthorized_redirectsLogin() throws Exception {
         doThrow(new UnauthorizedException("Exception"))
@@ -147,10 +126,6 @@ class WebTransactionCategoryControllerTest {
                 .andExpect(redirectedUrl("/login"));
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postCategoryDeletion_notFound_globalError() throws Exception {
         doThrow(new NotFoundException("Exception"))
@@ -163,10 +138,6 @@ class WebTransactionCategoryControllerTest {
                 .andExpect(model().attributeHasErrors("form"));
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postCategoryDeletion_validationErrors() throws Exception {
         mockMvc.perform(post("/category/delete")
@@ -177,10 +148,6 @@ class WebTransactionCategoryControllerTest {
                 .andExpect(model().attributeHasFieldErrors("form", "id"));
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postCategoryUpdating_success() throws Exception {
         mockMvc.perform(post("/category/update")
@@ -191,10 +158,6 @@ class WebTransactionCategoryControllerTest {
                 .andExpect(flash().attributeExists("success"));
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postCategoryUpdating_unauthorized_redirectsLogin() throws Exception {
         doThrow(new UnauthorizedException("Exception"))
@@ -207,10 +170,6 @@ class WebTransactionCategoryControllerTest {
                 .andExpect(redirectedUrl("/login"));
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postCategoryUpdating_alreadyExists_globalError() throws Exception {
         doThrow(new AlreadyExistsException("Exception"))
@@ -224,10 +183,6 @@ class WebTransactionCategoryControllerTest {
                 .andExpect(model().attributeHasErrors("form"));
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postCategoryUpdating_notFound_globalError() throws Exception {
         doThrow(new NotFoundException("Exception"))
@@ -241,10 +196,6 @@ class WebTransactionCategoryControllerTest {
                 .andExpect(model().attributeHasErrors("form"));
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postCategoryUpdating_validationErrors() throws Exception {
         mockMvc.perform(post("/category/update")
@@ -275,10 +226,6 @@ class WebTransactionCategoryControllerTest {
                 .andExpect(model().attribute("form", instanceOf(ExpenseReportForm.class)));
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postExpenseReport_success() throws Exception {
         LocalDate start = LocalDate.parse("2025-01-01");
@@ -299,10 +246,6 @@ class WebTransactionCategoryControllerTest {
                 .andExpect(model().attributeExists("transactions"));
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postExpenseReport_validationErrors() throws Exception {
         mockMvc.perform(post("/category/report/expense")
@@ -324,10 +267,6 @@ class WebTransactionCategoryControllerTest {
                 .andExpect(model().attribute("form", instanceOf(IncomeReportForm.class)));
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postIncomeReport_success() throws Exception {
         LocalDate start = LocalDate.parse("2025-01-01");
@@ -348,10 +287,6 @@ class WebTransactionCategoryControllerTest {
                 .andExpect(model().attributeExists("transactions"));
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postIncomeReport_validationErrors() throws Exception {
         mockMvc.perform(post("/category/report/income")

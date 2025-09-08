@@ -21,6 +21,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(WebMenuController.class)
 @Import(MockSecurityConfig.class)
+@WithUserDetails(
+        value = "user@gmail.com",
+        userDetailsServiceBeanName = "userDetailsService"
+)
 class WebMenuControllerTest {
     @Autowired
     MockMvc mockMvc;
@@ -31,10 +35,6 @@ class WebMenuControllerTest {
     @MockitoBean
     TransactionCategoryService transactionCategoryService;
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void getMenu_showAccounts_loadsAccounts() throws Exception {
         List<AccountDTO> accounts = List.of(
@@ -53,10 +53,6 @@ class WebMenuControllerTest {
                 .andExpect(model().attributeDoesNotExist("categories"));
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void getMenu_default_showsIdAndName_only() throws Exception {
         mockMvc.perform(get("/menu"))
@@ -67,10 +63,6 @@ class WebMenuControllerTest {
                 .andExpect(model().attributeDoesNotExist("accounts", "categories"));
     }
 
-    @WithUserDetails(
-            value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void getMenu_showCategories_loadsCategories() throws Exception {
         List<TransactionCategoryDTO> categories = List.of(new TransactionCategoryDTO(1, "transactionOne", 1));

@@ -1,5 +1,7 @@
 package com.yusof.web.api.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yusof.web.api.json.request.*;
 import com.yusof.web.entity.CategoryReportModel;
 import com.yusof.web.service.TransactionCategoryDTO;
 import com.yusof.web.service.TransactionCategoryService;
@@ -28,10 +30,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Import(MockSecurityConfig.class)
 @WebMvcTest(TransactionCategoryController.class)
+@WithUserDetails(value = "user@gmail.com",
+        userDetailsServiceBeanName = "userDetailsService")
 class TransactionCategoryControllerTest {
 
     @Autowired
     MockMvc mockMvc;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @MockitoBean
     TransactionService transactionService;
@@ -39,110 +46,84 @@ class TransactionCategoryControllerTest {
     @MockitoBean
     TransactionCategoryService transactionCategoryService;
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService")
     @Test
     void createCategory_created() throws Exception {
         when(transactionCategoryService.createCategory("Food", 1))
                 .thenReturn(new TransactionCategoryDTO(10, "Food", 1));
 
-        String body = """
-                  {"name":"Food"}
-                """;
+        TransactionCategoryCreationRequest request = new TransactionCategoryCreationRequest("Food");
 
         mockMvc.perform(post("/api/category/create")
                         .contentType(APPLICATION_JSON)
-                        .content(body))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
 
         verify(transactionCategoryService).createCategory("Food", 1);
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService")
     @Test
     void createCategory_validationError_badRequest() throws Exception {
-        String body = """
-                  {"name":""}
-                """;
+        TransactionCategoryCreationRequest request = new TransactionCategoryCreationRequest("");
 
         mockMvc.perform(post("/api/category/create")
                         .contentType(APPLICATION_JSON)
-                        .content(body))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(transactionCategoryService);
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService")
     @Test
     void deleteCategory_noContent() throws Exception {
-        String body = """
-                  {"id":7}
-                """;
+        TransactionCategoryDeletionRequest request = new TransactionCategoryDeletionRequest(7);
 
         mockMvc.perform(post("/api/category/delete")
                         .contentType(APPLICATION_JSON)
-                        .content(body))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNoContent());
 
         verify(transactionCategoryService).deleteTransactionCategory(7, 1);
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService")
     @Test
     void deleteCategory_validationError_badRequest() throws Exception {
-        String body = """
-                  {"id":0}
-                """;
+        TransactionCategoryDeletionRequest request = new TransactionCategoryDeletionRequest(0);
 
         mockMvc.perform(post("/api/category/delete")
                         .contentType(APPLICATION_JSON)
-                        .content(body))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
         verifyNoMoreInteractions(transactionCategoryService);
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService")
     @Test
     void updateCategory_ok_returnsDto() throws Exception {
+        TransactionCategoryUpdatingRequest request = new TransactionCategoryUpdatingRequest("Groceries", 5);
+
         when(transactionCategoryService.updateTransactionCategory("Groceries", 5, 1))
                 .thenReturn(new TransactionCategoryDTO(5, "Groceries", 1));
 
-        String body = """
-                  {"id":5,"name":"Groceries"}
-                """;
-
         mockMvc.perform(post("/api/category/update")
                         .contentType(APPLICATION_JSON)
-                        .content(body))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
         verify(transactionCategoryService).updateTransactionCategory("Groceries", 5, 1);
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService")
     @Test
     void updateCategory_validationError_badRequest() throws Exception {
-        String body = """
-                  {"id":-1,"name":""}
-                """;
+        TransactionCategoryUpdatingRequest request = new TransactionCategoryUpdatingRequest(" ", -1);
 
         mockMvc.perform(post("/api/category/update")
                         .contentType(APPLICATION_JSON)
-                        .content(body))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(transactionCategoryService);
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService")
     @Test
     void showCategories_ok_returnsList() throws Exception {
         when(transactionCategoryService.viewTransactionCategory(1))
@@ -161,12 +142,12 @@ class TransactionCategoryControllerTest {
         verify(transactionCategoryService).viewTransactionCategory(1);
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService")
     @Test
     void incomeReport_ok_returnsList() throws Exception {
         LocalDate start = LocalDate.of(2025, 1, 1);
         LocalDate end = LocalDate.of(2025, 1, 31);
+
+        IncomeReportRequest request = new IncomeReportRequest(start, end);
 
         when(transactionService.getIncomeReportByCategory(1, start, end))
                 .thenReturn(List.of(
@@ -174,14 +155,9 @@ class TransactionCategoryControllerTest {
                         new CategoryReportModel("Bonus", new BigDecimal("250.00"))
                 ));
 
-        String body = """
-                  {"startDate":"2025-01-01",
-                  "endDate":"2025-01-31"}
-                """;
-
         mockMvc.perform(post("/api/category/report/income")
                         .contentType(APPLICATION_JSON)
-                        .content(body)
+                        .content(objectMapper.writeValueAsString(request))
                         .accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
@@ -193,12 +169,12 @@ class TransactionCategoryControllerTest {
         verify(transactionService).getIncomeReportByCategory(1, start, end);
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService")
     @Test
     void expenseReport_ok_returnsList() throws Exception {
         LocalDate start = LocalDate.of(2025, 2, 1);
         LocalDate end = LocalDate.of(2025, 2, 28);
+
+        ExpenseReportRequest request = new ExpenseReportRequest(start, end);
 
         when(transactionService.getExpenseReportByCategory(eq(1), eq(start), eq(end)))
                 .thenReturn(List.of(
@@ -206,22 +182,16 @@ class TransactionCategoryControllerTest {
                         new CategoryReportModel("Fuel", new BigDecimal("80.00"))
                 ));
 
-        String body = """
-                  {"startDate":"2025-02-01","endDate":"2025-02-28"}
-                """;
-
         mockMvc.perform(post("/api/category/report/expense")
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON)
-                        .content(body))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));
 
         verify(transactionService).getExpenseReportByCategory(1, start, end);
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService")
     @Test
     void report_validationError_badRequest_income() throws Exception {
         mockMvc.perform(post("/api/category/report/income")
@@ -232,8 +202,6 @@ class TransactionCategoryControllerTest {
         verifyNoInteractions(transactionService);
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService")
     @Test
     void report_validationError_badRequest_expense() throws Exception {
         mockMvc.perform(post("/api/category/report/expense")

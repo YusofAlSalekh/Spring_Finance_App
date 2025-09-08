@@ -26,6 +26,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Import(MockSecurityConfig.class)
 @WebMvcTest(WebAccountController.class)
+@WithUserDetails(value = "user@gmail.com",
+        userDetailsServiceBeanName = "userDetailsService"
+)
 class WebAccountControllerTest {
     @Autowired
     MockMvc mockMvc;
@@ -39,13 +42,9 @@ class WebAccountControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("form"))
                 .andExpect(model().attribute("form", instanceOf(AccountCreationForm.class)))
-                .andExpect(view().name("accountCreation"))
-        ;
+                .andExpect(view().name("accountCreation"));
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postAccountCreation_success() throws Exception {
         AccountDTO accountDTO = new AccountDTO(1, "Account", new BigDecimal("100.00"), 1);
@@ -59,9 +58,6 @@ class WebAccountControllerTest {
                 .andExpect(flash().attributeExists("success"));
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postAccountCreation_unauthorized_redirectsLogin() throws Exception {
         when(accountService.createAccount("Account", new BigDecimal("100.00"), 1))
@@ -74,9 +70,6 @@ class WebAccountControllerTest {
                 .andExpect(redirectedUrl("/login"));
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postAccountCreation_alreadyExists_fieldError() throws Exception {
         when(accountService.createAccount("Account", new BigDecimal("100.00"), 1))
@@ -90,9 +83,6 @@ class WebAccountControllerTest {
                 .andExpect(model().attributeHasFieldErrors("form", "name"));
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postAccountCreation_validationErrors() throws Exception {
         mockMvc.perform(post("/account/create")
@@ -112,9 +102,6 @@ class WebAccountControllerTest {
                 .andExpect(view().name("accountDeletion"));
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postAccountDeletion_success() throws Exception {
         doNothing().when(accountService).deleteAccount(1, 1);
@@ -126,9 +113,6 @@ class WebAccountControllerTest {
                 .andExpect(flash().attributeExists("success"));
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postAccountDeletion_unauthorized_redirectsLogin() throws Exception {
         doThrow(new UnauthorizedException("Exception"))
@@ -140,9 +124,6 @@ class WebAccountControllerTest {
                 .andExpect(redirectedUrl("/login"));
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postAccountDeletion_notFound_globalError() throws Exception {
         doThrow(new NotFoundException("Exception"))
@@ -155,9 +136,6 @@ class WebAccountControllerTest {
                 .andExpect(view().name("accountDeletion"));
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postAccountDeletion_validationErrors() throws Exception {
         mockMvc.perform(post("/account/delete")
@@ -177,9 +155,6 @@ class WebAccountControllerTest {
         ;
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postAccountNameChanging_success() throws Exception {
         when(accountService.updateAccountName("NewName", 1, 1))
@@ -193,9 +168,6 @@ class WebAccountControllerTest {
                 .andExpect(flash().attributeExists("success"));
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postAccountNameChanging_unauthorized_redirectsLogin() throws Exception {
         when(accountService.updateAccountName("NewName", 1, 1))
@@ -208,9 +180,6 @@ class WebAccountControllerTest {
                 .andExpect(redirectedUrl("/login"));
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postAccountNameChanging_alreadyExists_globalError() throws Exception {
         when(accountService.updateAccountName("ExistedName", 1, 1))
@@ -224,9 +193,6 @@ class WebAccountControllerTest {
                 .andExpect(model().attributeHasErrors("form"));
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postAccountNameChanging_notFound_globalError() throws Exception {
         when(accountService.updateAccountName("NewName", 999, 1))
@@ -240,9 +206,6 @@ class WebAccountControllerTest {
                 .andExpect(model().attributeHasErrors("form"));
     }
 
-    @WithUserDetails(value = "user@gmail.com",
-            userDetailsServiceBeanName = "userDetailsService"
-    )
     @Test
     void postAccountNameChanging_validationErrors() throws Exception {
         mockMvc.perform(post("/account/update")
