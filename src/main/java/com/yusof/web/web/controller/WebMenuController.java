@@ -40,6 +40,6 @@ public class WebMenuController {
                     transactionCategoryService.viewTransactionCategory(clientId);
             model.addAttribute("categories", transactionCategory);
         }
-        return "menu";
+        return "menu-form";
     }
 }

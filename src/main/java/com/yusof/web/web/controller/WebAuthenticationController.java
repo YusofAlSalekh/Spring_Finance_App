@@ -21,7 +21,7 @@ public class WebAuthenticationController {
 
     @GetMapping("/login")
     public String getLogin() {
-        return "login";
+        return "login-form";
     }
 
     @GetMapping("/register")
